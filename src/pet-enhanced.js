@@ -316,7 +316,7 @@ export class PetEnhanced {
         const shadowScale = Math.max(0.4, 1 - Math.abs(this.jumpY) / 100);
         ctx.fillStyle = 'rgba(20, 60, 20, 0.4)';
         ctx.beginPath();
-        ctx.ellipse(this.x, this.y + 16, 18 * shadowScale, 6 * shadowScale, 0, 0, Math.PI * 2);
+        ctx.ellipse(this.x, this.y + 19, 18 * shadowScale, 6 * shadowScale, 0, 0, Math.PI * 2);
         ctx.fill();
     }
 
@@ -353,205 +353,303 @@ export class PetEnhanced {
 
     drawCatSprite() {
         const ctx = this.ctx;
-        const legStep = Math.sin(this.walkFrame * 0.5) * 4;
+        const now = Date.now();
+        const walkCycle = this.walkFrame * 0.45;
+        const isMoving = this.isMoving;
 
-        // Tail
+        // Synchronized bipedal animation factors
+        const legStep = isMoving ? Math.sin(walkCycle) * 4 : 0;
+        const bodyBob = isMoving ? Math.abs(Math.sin(walkCycle)) * 1.5 : Math.sin(now * 0.003) * 0.8;
+        const headBob = isMoving ? Math.sin(walkCycle) * 1.0 : Math.sin(now * 0.003 + 0.4) * 0.6;
+
+        // Arm swing & gestures
+        let leftArmAngle = 0;
+        let rightArmAngle = 0;
+        let armOffsetY = bodyBob;
+
+        if (!this.isGrounded) {
+            // Jumping: hands raised up joyfully!
+            leftArmAngle = -0.95;
+            rightArmAngle = 0.95;
+            armOffsetY = -3;
+        } else if (this.isSpinning) {
+            // Spinning Act (B): outstretched hands!
+            leftArmAngle = -1.15;
+            rightArmAngle = 1.15;
+            armOffsetY = -2;
+        } else if (isMoving) {
+            // Walking: natural bipedal arm swing (opposite to leg step)
+            leftArmAngle = Math.sin(walkCycle) * 0.55;
+            rightArmAngle = -Math.sin(walkCycle) * 0.55;
+        } else {
+            // Idle: arms resting comfortably against sides
+            leftArmAngle = 0.12 + Math.sin(now * 0.003) * 0.05;
+            rightArmAngle = -0.12 - Math.sin(now * 0.003) * 0.05;
+        }
+
+        // ==========================================
+        // 1. EKOR (TAIL) - Attached to lower back
+        // ==========================================
+        this.drawTail(ctx, -10, 6 - bodyBob);
+
+        // ==========================================
+        // 2. TANGAN KIRI / BELAKANG (LEFT ARM & HAND)
+        // ==========================================
+        this.drawArm(ctx, -10, -1 - bodyBob + armOffsetY, leftArmAngle, true);
+
+        // ==========================================
+        // 3. 2 KAKI (2 BIPEDAL LEGS & FEET)
+        // ==========================================
+        this.drawLegs(ctx, legStep, bodyBob);
+
+        // ==========================================
+        // 4. BADAN (TORSO / BODY)
+        // ==========================================
+        this.drawTorso(ctx, bodyBob);
+
+        // ==========================================
+        // 5. KEPALA (HEAD, EARS, FACE)
+        // ==========================================
+        this.drawHead(ctx, headBob);
+
+        // ==========================================
+        // 6. TANGAN KANAN / DEPAN (RIGHT ARM & HAND)
+        // ==========================================
+        this.drawArm(ctx, 9, -1 - bodyBob + armOffsetY, rightArmAngle, false);
+    }
+
+    // ====================================================
+    // SUB-ROUTINE: EKOR (TAIL)
+    // ====================================================
+    drawTail(ctx, originX, originY) {
         ctx.save();
-        ctx.translate(-18, 2);
+        ctx.translate(originX, originY);
         ctx.rotate(this.tailAngle);
 
+        // Tail Outline
         ctx.fillStyle = '#1e0c05';
-        ctx.fillRect(-11, -4, 12, 8);
-        ctx.fillRect(-13, -2, 4, 6);
+        ctx.fillRect(-12, -4, 13, 8);
+        ctx.fillRect(-14, -2, 4, 6);
 
+        // Orange Base Fur
         ctx.fillStyle = '#f57c20';
-        ctx.fillRect(-9, -2, 8, 5);
+        ctx.fillRect(-10, -2, 9, 5);
 
+        // Fluffy White Tail Tip
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-12, -2, 4, 5);
+        ctx.fillRect(-13, -2, 4, 5);
+
         ctx.restore();
+    }
 
-        // ==================== LEFT ARM & HAND (BACK ARM) ====================
+    // ====================================================
+    // SUB-ROUTINE: 2 TANGAN (ARMS & WHITE PAWS)
+    // ====================================================
+    drawArm(ctx, shoulderX, shoulderY, angle, isBackArm) {
         ctx.save();
-        let leftArmAngle = 0;
-        let leftArmX = -13;
-        let leftArmY = 0;
+        ctx.translate(shoulderX, shoulderY);
+        ctx.rotate(angle);
 
-        if (!this.isGrounded) {
-            // Both hands raised up in joy while jumping!
-            leftArmAngle = -0.7;
-            leftArmY = -5;
-            leftArmX = -12;
-        } else if (this.isSpinning) {
-            leftArmAngle = -0.85;
-            leftArmY = -5;
-        } else if (this.isMoving) {
-            leftArmAngle = Math.sin(this.walkFrame * 0.5) * 0.45;
-            leftArmY = Math.sin(this.walkFrame * 0.5) * 2;
-        } else {
-            leftArmAngle = Math.sin(Date.now() * 0.005) * 0.08;
-        }
-
-        ctx.translate(leftArmX, leftArmY);
-        ctx.rotate(leftArmAngle);
-
-        // Left Arm Outline
+        // Arm dark outline
         ctx.fillStyle = '#1e0c05';
-        ctx.fillRect(-3, 0, 7, 10);
-        // Orange Arm Fur
-        ctx.fillStyle = '#f57c20';
-        ctx.fillRect(-2, 1, 5, 5);
+        ctx.fillRect(-3, 0, 7, 11);
+        ctx.fillRect(-2, 11, 5, 2);
+
+        // Orange Arm Fur Sleeve
+        ctx.fillStyle = isBackArm ? '#d96411' : '#f57c20';
+        ctx.fillRect(-2, 1, 5, 6);
+
         // White Paw / Hand
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-2, 6, 5, 3);
-        ctx.restore();
+        ctx.fillRect(-2, 7, 5, 5);
 
-        // ==================== 2 WALKING LEGS / FEET ====================
-        // Left Leg / Foot
-        ctx.fillStyle = '#1e0c05';
-        ctx.fillRect(-12, 12 + legStep, 9, 8);
-        ctx.fillStyle = '#f57c20';
-        ctx.fillRect(-11, 13 + legStep, 7, 3);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-11, 16 + legStep, 7, 3);
-
-        // Right Leg / Foot
-        ctx.fillStyle = '#1e0c05';
-        ctx.fillRect(3, 12 - legStep, 9, 8);
-        ctx.fillStyle = '#f57c20';
-        ctx.fillRect(4, 13 - legStep, 7, 3);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(4, 16 - legStep, 7, 3);
-
-        // ==================== BODY & HEAD ====================
-        // Body Outline
-        ctx.fillStyle = '#1e0c05';
-        ctx.fillRect(-19, -15, 38, 28);
-        ctx.clearRect(-19, -15, 2, 2);
-        ctx.clearRect(17, -15, 2, 2);
-        ctx.clearRect(-19, 11, 2, 2);
-        ctx.clearRect(17, 11, 2, 2);
-
-        // Orange Body
-        ctx.fillStyle = '#f57c20';
-        ctx.fillRect(-17, -13, 34, 24);
-
-        // Highlight & Shadow
-        ctx.fillStyle = '#ffa756';
-        ctx.fillRect(-15, -13, 30, 3);
-        ctx.fillStyle = '#c0520b';
-        ctx.fillRect(-17, 7, 34, 4);
-
-        // White Chest & Face
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-3, -13, 14, 24);
-        ctx.fillStyle = '#e2e8f0';
-        ctx.fillRect(-3, 7, 14, 4);
-
-        // ==================== RIGHT ARM & HAND (FRONT ARM) ====================
-        ctx.save();
-        let rightArmAngle = 0;
-        let rightArmX = 8;
-        let rightArmY = 0;
-
-        if (!this.isGrounded) {
-            // Both hands raised up in joy!
-            rightArmAngle = 0.7;
-            rightArmY = -5;
-            rightArmX = 9;
-        } else if (this.isSpinning) {
-            rightArmAngle = 0.85;
-            rightArmY = -5;
-        } else if (this.isMoving) {
-            rightArmAngle = -Math.sin(this.walkFrame * 0.5) * 0.45;
-            rightArmY = -Math.sin(this.walkFrame * 0.5) * 2;
-        } else {
-            rightArmAngle = -Math.sin(Date.now() * 0.005) * 0.08;
-        }
-
-        ctx.translate(rightArmX, rightArmY);
-        ctx.rotate(rightArmAngle);
-
-        // Right Arm Outline
-        ctx.fillStyle = '#1e0c05';
-        ctx.fillRect(-2, 0, 7, 10);
-        // Orange Arm Fur
-        ctx.fillStyle = '#f57c20';
-        ctx.fillRect(-1, 1, 5, 5);
-        // White Paw / Hand
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-1, 6, 5, 3);
-        // Tiny cute pink paw pad
+        // Cute Pink Paw Pad
         ctx.fillStyle = '#fda4af';
-        ctx.fillRect(0, 7, 3, 1);
-        ctx.restore();
+        ctx.fillRect(-1, 8, 3, 2);
+        ctx.fillRect(0, 10, 1, 1);
 
-        // Ears
+        ctx.restore();
+    }
+
+    // ====================================================
+    // SUB-ROUTINE: 2 KAKI (LEGS & FEET)
+    // ====================================================
+    drawLegs(ctx, legStep, bodyBob) {
+        const baseY = 10 - bodyBob;
+
+        // Left Leg & Paw (Back Leg)
+        ctx.fillStyle = '#1e0c05';
+        ctx.fillRect(-9, baseY + legStep, 7, 9);
+        ctx.fillStyle = '#d96411';
+        ctx.fillRect(-8, baseY + legStep + 1, 5, 4);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-8, baseY + legStep + 5, 5, 4);
+
+        // Right Leg & Paw (Front Leg)
+        ctx.fillStyle = '#1e0c05';
+        ctx.fillRect(2, baseY - legStep, 7, 9);
+        ctx.fillStyle = '#f57c20';
+        ctx.fillRect(3, baseY - legStep + 1, 5, 4);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(3, baseY - legStep + 5, 5, 4);
+    }
+
+    // ====================================================
+    // SUB-ROUTINE: BADAN (TORSO / BODY)
+    // ====================================================
+    drawTorso(ctx, bodyBob) {
+        const topY = -3 - bodyBob;
+        const width = 22;
+        const height = 15;
+        const leftX = -11;
+
+        // Torso Outline
+        ctx.fillStyle = '#1e0c05';
+        ctx.fillRect(leftX, topY, width, height);
+        // Rounded pixel corners
+        ctx.clearRect(leftX, topY, 1, 1);
+        ctx.clearRect(leftX + width - 1, topY, 1, 1);
+        ctx.clearRect(leftX, topY + height - 1, 1, 1);
+        ctx.clearRect(leftX + width - 1, topY + height - 1, 1, 1);
+
+        // Main Orange Fur Body
+        ctx.fillStyle = '#f57c20';
+        ctx.fillRect(leftX + 2, topY + 1, width - 4, height - 2);
+
+        // Body Highlight (Top)
+        ctx.fillStyle = '#ffa756';
+        ctx.fillRect(leftX + 2, topY + 1, width - 4, 2);
+
+        // Body Shadow (Bottom)
+        ctx.fillStyle = '#c0520b';
+        ctx.fillRect(leftX + 2, topY + height - 3, width - 4, 2);
+
+        // White Tummy / Belly Patch (Centered)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-4, topY + 2, 8, height - 3);
+
+        // Tummy Shadow (Bottom of belly)
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(-4, topY + height - 3, 8, 2);
+    }
+
+    // ====================================================
+    // SUB-ROUTINE: KEPALA (HEAD, EARS, EYES, NOSE, BLUSH)
+    // ====================================================
+    drawHead(ctx, headBob) {
+        const headTopY = -24 - headBob;
+        const headW = 30;
+        const headH = 21;
+        const headX = -15;
+
+        // ----- CAT EARS (On top of head) -----
+        // Left Ear
         ctx.fillStyle = '#1e0c05';
         ctx.beginPath();
-        ctx.moveTo(-16, -15);
-        ctx.lineTo(-10, -28);
-        ctx.lineTo(-3, -15);
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(3, -15);
-        ctx.lineTo(10, -28);
-        ctx.lineTo(16, -15);
+        ctx.moveTo(-14, headTopY);
+        ctx.lineTo(-9, headTopY - 11);
+        ctx.lineTo(-3, headTopY);
         ctx.fill();
 
         ctx.fillStyle = '#f57c20';
         ctx.beginPath();
-        ctx.moveTo(-15, -15);
-        ctx.lineTo(-10, -26);
-        ctx.lineTo(-4, -15);
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(4, -15);
-        ctx.lineTo(10, -26);
-        ctx.lineTo(15, -15);
+        ctx.moveTo(-13, headTopY);
+        ctx.lineTo(-9, headTopY - 9);
+        ctx.lineTo(-4, headTopY);
         ctx.fill();
 
         ctx.fillStyle = '#ffb3c1';
-        ctx.fillRect(-11, -22, 3, 7);
-        ctx.fillRect(8, -22, 3, 7);
+        ctx.fillRect(-10, headTopY - 7, 3, 5);
 
-        // Anime Eyes
-        this.renderCatEye(-8, -2);
-        this.renderCatEye(8, -2);
-
-        // Nose & Blush
+        // Right Ear
         ctx.fillStyle = '#1e0c05';
-        ctx.fillRect(2, 4, 3, 2);
+        ctx.beginPath();
+        ctx.moveTo(3, headTopY);
+        ctx.lineTo(9, headTopY - 11);
+        ctx.lineTo(14, headTopY);
+        ctx.fill();
 
+        ctx.fillStyle = '#f57c20';
+        ctx.beginPath();
+        ctx.moveTo(4, headTopY);
+        ctx.lineTo(9, headTopY - 9);
+        ctx.lineTo(13, headTopY);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffb3c1';
+        ctx.fillRect(7, headTopY - 7, 3, 5);
+
+        // ----- HEAD BASE -----
+        // Head Outline
+        ctx.fillStyle = '#1e0c05';
+        ctx.fillRect(headX, headTopY, headW, headH);
+        // Rounded corners
+        ctx.clearRect(headX, headTopY, 2, 2);
+        ctx.clearRect(headX + headW - 2, headTopY, 2, 2);
+        ctx.clearRect(headX, headTopY + headH - 2, 2, 2);
+        ctx.clearRect(headX + headW - 2, headTopY + headH - 2, 2, 2);
+
+        // Main Orange Fur
+        ctx.fillStyle = '#f57c20';
+        ctx.fillRect(headX + 2, headTopY + 2, headW - 4, headH - 4);
+
+        // Head Top Highlight
+        ctx.fillStyle = '#ffa756';
+        ctx.fillRect(headX + 3, headTopY + 2, headW - 6, 2);
+
+        // Head Bottom Chin Shadow
+        ctx.fillStyle = '#c0520b';
+        ctx.fillRect(headX + 2, headTopY + headH - 3, headW - 4, 2);
+
+        // White Face Stripe / Muzzle
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-4, headTopY + 3, 8, headH - 4);
+
+        // ----- SPARKLING ANIME EYES -----
+        const eyeY = headTopY + 9;
+        this.renderCatEye(ctx, -7, eyeY);
+        this.renderCatEye(ctx, 7, eyeY);
+
+        // ----- NOSE & MOUTH -----
+        ctx.fillStyle = '#1e0c05';
+        ctx.fillRect(-1, headTopY + 14, 2, 2); // Black nose
+        ctx.fillStyle = '#d96411';
+        ctx.fillRect(-1, headTopY + 16, 2, 1); // Tiny mouth line
+
+        // ----- CHEERFUL BLUSH CHEEKS -----
         ctx.fillStyle = 'rgba(244, 63, 94, 0.45)';
-        ctx.fillRect(-13, 3, 4, 3);
-        ctx.fillRect(12, 3, 4, 3);
+        ctx.fillRect(-11, headTopY + 12, 3, 2);
+        ctx.fillRect(8, headTopY + 12, 3, 2);
     }
 
-    renderCatEye(x, y) {
-        const ctx = this.ctx;
-        const w = 9;
-        const h = 11;
+    renderCatEye(ctx, x, y) {
+        const w = 8;
+        const h = 9;
 
         if (this.eyeState === 'open') {
+            // Eye Outline
             ctx.fillStyle = '#10172a';
-            ctx.fillRect(x - 4, y - 5, w, h);
+            ctx.fillRect(x - 3, y - 4, w, h);
 
+            // Deep Navy Top Iris
             ctx.fillStyle = '#0f294d';
-            ctx.fillRect(x - 3, y - 4, w - 2, h - 2);
+            ctx.fillRect(x - 2, y - 3, w - 2, h - 2);
 
+            // Vibrant Cyan Bottom Iris
             ctx.fillStyle = '#38bdf8';
-            ctx.fillRect(x - 3, y, w - 2, 4);
+            ctx.fillRect(x - 2, y, w - 2, 3);
 
+            // Big White Sparkle
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(x - 3, y - 4, 3, 3);
-            ctx.fillRect(x + 1, y + 1, 2, 2);
+            ctx.fillRect(x - 2, y - 3, 2, 2);
+
+            // Small White Secondary Sparkle
+            ctx.fillRect(x + 1, y + 1, 1, 1);
         } else {
+            // Closed Eye (Happy Curved Arc `^`)
             ctx.fillStyle = '#10172a';
-            ctx.fillRect(x - 4, y, w, 2);
-            ctx.fillRect(x - 2, y - 2, w - 4, 2);
+            ctx.fillRect(x - 3, y, w, 2);
+            ctx.fillRect(x - 1, y - 2, w - 4, 2);
         }
     }
 }
