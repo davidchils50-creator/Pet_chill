@@ -3,21 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pet Chill - 2D Pixel Art Game</title>
+    <title>🐾 Pet Chill - Pixel Art Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>🐾 Pet Chill</h1>
+        <div class="header">
+            <h1>🐾 Pet Chill</h1>
+            <p>Pixel Art Pet Simulator</p>
+        </div>
+
         <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <div class="controls">
+            <div class="control-item">
+                <span class="key">SPACE</span>
+                <span class="desc">Pause/Resume</span>
+            </div>
+            <div class="control-item">
+                <span class="key">M</span>
+                <span class="desc">Toggle Sound</span>
+            </div>
+            <div class="control-item">
+                <span class="key">+/-</span>
+                <span class="desc">Volume</span>
+            </div>
+        </div>
+
         <div class="info">
-            <p>Pet sedang bermain di area bermainnya. Amati gerakannya yang random dan mata yang berkedip!</p>
+            <p>Amati pet bergerak acak, mata berkedip, dan interaksi dengan lingkungan! 🌿</p>
         </div>
     </div>
 
-    <!-- Import semua module script dalam urutan yang benar -->
-    <script src="src/map.js"></script>
-    <script src="src/pet.js"></script>
+    <!-- Scripts in correct order -->
+    <script src="src/terrain.js"></script>
+    <script src="src/pet-enhanced.js"></script>
+    <script src="src/sound-manager.js"></script>
     <script src="src/main.js"></script>
 </body>
 </html>
