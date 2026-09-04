@@ -1,0 +1,10 @@
+# Git ignore file untuk Pet Chill project
+node_modules/
+.DS_Store
+.env
+.vscode/
+.idea/
+dist/
+build/
+*.log
+.cache/
