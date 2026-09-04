@@ -1,120 +1,131 @@
 /* ===================================
-   MAIN.JS - Entry point & Game Loop
+   MAIN.JS - Enhanced Game Loop
    =================================== */
 
 // Get canvas element
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Inisialisasi game objects
-let map;
+// Game objects
+let terrain;
 let pet;
+let soundManager;
 let gameRunning = true;
 let frameCount = 0;
-let fps = 60; // Target 60 FPS
 
 /**
- * Inisialisasi game - dipanggil saat halaman selesai loading
+ * Initialize game
  */
 function initGame() {
     console.log('🎮 Pet Chill Game Initialized');
     console.log(`Canvas: ${canvas.width}x${canvas.height}`);
     
-    // Create map instance
-    map = new Map(canvas);
+    // Create managers
+    soundManager = new SoundManager();
+    terrain = new Terrain(canvas);
     
-    // Create pet instance dengan posisi di tengah canvas
+    // Create pet dengan terrain
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    pet = new Pet(canvas, map, centerX, centerY);
+    pet = new PetEnhanced(canvas, terrain, centerX, centerY);
     
-    console.log(`✅ Map loaded`);
+    console.log(`✅ Terrain loaded`);
     console.log(`✅ Pet spawned at (${centerX}, ${centerY})`);
+    console.log('🎮 Controls:');
+    console.log('   SPACE: Pause/Resume');
+    console.log('   M: Toggle Sound');
+    console.log('   +/-: Volume Up/Down');
     
-    // Mulai game loop
     gameLoop();
 }
 
 /**
- * GAME LOOP - Jantung dari game
- * Menggunakan requestAnimationFrame untuk smooth 60 FPS
- * 
- * Flow setiap frame:
- * 1. Update logika game (AI, animasi)
- * 2. Clear canvas
- * 3. Render semua objects
- * 4. Schedule frame berikutnya
+ * Main game loop
  */
 function gameLoop() {
     if (!gameRunning) return;
-
-    // REQUEST NEXT FRAME
-    // requestAnimationFrame = native browser animation loop (synchronized dengan refresh rate)
+    
     requestAnimationFrame(gameLoop);
-
     frameCount++;
 
-    // ==================== UPDATE PHASE ====================
-    // Update semua logika game sebelum render
+    // ==================== UPDATE ====================
     pet.update();
 
-    // ==================== RENDER PHASE ====================
-    // Clear canvas dengan warna latar
+    // ==================== RENDER ====================
+    // Clear canvas dengan warna hitam
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Render map
-    map.render();
-
+    // Render terrain (grass + border)
+    terrain.render();
+    
     // Render pet
     pet.render();
 
-    // ==================== DEBUG INFO (Optional) ====================
-    // Uncomment untuk melihat debug info
+    // ==================== SOUND TRIGGERS ====================
+    // Blink sound setiap beberapa frame
+    if (frameCount % 120 === 0) {
+        soundManager.playBlink();
+    }
+    
+    // Footstep sound saat walking
+    if (pet.moving && frameCount % 10 === 0) {
+        soundManager.playFootstep();
+    }
+    
+    // Idle sound
+    if (!pet.moving && frameCount % 300 === 0) {
+        soundManager.playIdle();
+    }
+
+    // ==================== OPTIONAL DEBUG INFO ====================
     // renderDebugInfo();
 }
 
 /**
- * DEBUG - Tampilkan info di canvas
- * Uncomment di gameLoop() jika ingin debugging
+ * Debug info render
  */
 function renderDebugInfo() {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.font = '12px Arial';
+    ctx.font = '12px monospace';
     ctx.fillText(`Frame: ${frameCount}`, 10, 20);
-    ctx.fillText(`Pet Pos: (${Math.round(pet.x)}, ${Math.round(pet.y)})`, 10, 35);
-    ctx.fillText(`Pet State: ${pet.isWalking ? 'WALKING' : 'IDLE'}`, 10, 50);
-    ctx.fillText(`Eye State: ${pet.eyeState}`, 10, 65);
-    ctx.fillText(`Dir: (${pet.directionX}, ${pet.directionY})`, 10, 80);
+    ctx.fillText(`Pet: (${Math.round(pet.x)}, ${Math.round(pet.y)})`, 10, 35);
+    ctx.fillText(`State: ${pet.isWalking ? 'WALKING' : 'IDLE'}`, 10, 50);
+    ctx.fillText(`Eyes: ${pet.eyeState}`, 10, 65);
+    ctx.fillText(`Moving: ${pet.moving}`, 10, 80);
 }
 
 /**
- * Handle game pause/resume dengan spacebar
+ * Keyboard controls
  */
 document.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
+        e.preventDefault();
         gameRunning = !gameRunning;
         console.log(gameRunning ? '▶️ Game resumed' : '⏸️ Game paused');
         if (gameRunning) gameLoop();
     }
+    
+    if (e.code === 'KeyM') {
+        soundManager.toggleSound();
+    }
+    
+    if (e.code === 'Equal' || e.code === 'Plus') {
+        soundManager.setVolume(soundManager.masterVolume + 0.1);
+        console.log(`🔊 Volume: ${Math.round(soundManager.masterVolume * 100)}%`);
+    }
+    
+    if (e.code === 'Minus') {
+        soundManager.setVolume(soundManager.masterVolume - 0.1);
+        console.log(`🔊 Volume: ${Math.round(soundManager.masterVolume * 100)}%`);
+    }
 });
 
 /**
- * Handle window resize - responsive canvas
+ * Start game
  */
-window.addEventListener('resize', () => {
-    // Optional: Sesuaikan canvas size saat window di-resize
-    // Untuk sekarang kita pakai fixed size
-});
-
-// ==================== STARTUP ====================
-// Tunggu DOM selesai loading sebelum inisialisasi
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initGame);
 } else {
     initGame();
 }
-
-console.log('🎮 Pet Chill - Controls:');
-console.log('   SPACE: Pause/Resume game');
-console.log('   Game akan berjalan otomatis dengan AI wander pet');
