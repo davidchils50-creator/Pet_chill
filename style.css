@@ -1,173 +1,162 @@
 /* ===================================
-   STYLE.CSS - Pixel Perfect Styling
+   STYLE.CSS - Retro 16-bit Arcade Styling
    =================================== */
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 body {
-    font-family: 'Arial', 'Courier New', monospace;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'Press Start 2P', monospace, sans-serif;
+    background-color: #0c1022;
+    background-image: 
+        radial-gradient(circle at 50% 30%, #1a234a 0%, #0c1022 75%),
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 100% 100%, 20px 20px, 20px 20px;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 20px;
+    padding: 16px;
+    color: #ffffff;
+    overflow-x: hidden;
 }
 
-.container {
+.arcade-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    max-width: 860px;
+    width: 100%;
 }
 
-.header {
-    text-align: center;
-    color: white;
+.canvas-container {
+    position: relative;
+    border: 4px solid #000000;
+    border-radius: 8px;
+    box-shadow: 
+        0 0 0 3px #3b4266,
+        0 16px 36px rgba(0, 0, 0, 0.7);
+    background: #000000;
+    line-height: 0;
+    overflow: hidden;
+    width: 100%;
+    max-width: 800px;
 }
 
-.header h1 {
-    font-size: 2.5em;
-    margin-bottom: 5px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.header p {
-    font-size: 1em;
-    opacity: 0.9;
-}
-
-/* ==================== CANVAS ====================*/
 #gameCanvas {
     display: block;
-    border: 4px solid #fff;
-    background: #000;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
     
-    /* Pixel perfect rendering - sangat penting! */
+    /* Pixel Perfect Rendering */
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     image-rendering: -webkit-optimize-contrast;
     -ms-interpolation-mode: nearest-neighbor;
-    
-    /* Anti-scaling blur */
-    width: 800px;
-    height: 600px;
-    max-width: 100%;
 }
 
-/* ==================== CONTROLS ====================*/
-.controls {
+/* ==================== ARCADE CONTROL DECK ==================== */
+.arcade-deck {
     display: flex;
-    gap: 20px;
-    justify-content: center;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
+    max-width: 800px;
+    margin-top: 14px;
+    padding: 12px 18px;
+    background: #151b3b;
+    border: 3px solid #000000;
+    border-radius: 8px;
+    box-shadow: 
+        0 0 0 2px #3b4266,
+        0 6px 16px rgba(0, 0, 0, 0.4);
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
-.control-item {
+.control-tag {
+    font-size: 10px;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+}
+
+.deck-actions {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 10px 15px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    font-size: 0.9em;
+    gap: 12px;
 }
 
-.key {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-weight: bold;
-    font-family: 'Courier New', monospace;
-    min-width: 50px;
-    text-align: center;
+.arcade-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: 3px solid #000000;
+    border-radius: 6px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: #ffffff;
+    cursor: pointer;
+    transition: transform 0.05s ease, filter 0.1s ease;
+    box-shadow: 0 4px 0 #000000;
+    touch-action: manipulation;
 }
 
-.desc {
-    opacity: 0.9;
+.arcade-btn:hover {
+    filter: brightness(1.15);
 }
 
-/* ==================== INFO ====================*/
-.info {
-    text-align: center;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.95em;
-    max-width: 600px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 15px 20px;
-    border-radius: 8px;
-    border-left: 3px solid #ffd700;
+.arcade-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #000000;
 }
 
-/* ==================== RESPONSIVE ====================*/
-@media (max-width: 900px) {
-    #gameCanvas {
-        width: 100%;
-        height: auto;
-        max-width: 90vw;
-    }
-    
-    .header h1 {
-        font-size: 2em;
-    }
-    
-    .controls {
-        gap: 10px;
-    }
-    
-    .control-item {
-        padding: 8px 12px;
-        font-size: 0.85em;
-    }
+.btn-jump {
+    background: #ef4444;
 }
 
-@media (max-width: 600px) {
-    .container {
-        padding: 15px;
-        gap: 15px;
-    }
-    
-    #gameCanvas {
-        width: 100%;
-    }
-    
-    .header h1 {
-        font-size: 1.5em;
-    }
-    
-    .controls {
+.btn-act {
+    background: #3b82f6;
+}
+
+.btn-audio {
+    background: #10b981;
+}
+
+.btn-letter {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+    font-size: 10px;
+}
+
+.btn-label {
+    font-size: 9px;
+}
+
+@media (max-width: 650px) {
+    .arcade-deck {
         flex-direction: column;
-        gap: 8px;
+        align-items: center;
+        text-align: center;
+        padding: 12px;
     }
-    
-    .control-item {
+    .deck-actions {
         width: 100%;
-        justify-content: space-between;
+        justify-content: center;
     }
-}
-
-/* ==================== ANIMATIONS ====================*/
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
+    .arcade-btn {
+        padding: 10px 14px;
     }
-    50% {
-        opacity: 0.8;
-    }
-}
-
-#gameCanvas:hover {
-    animation: pulse 2s ease-in-out infinite;
 }

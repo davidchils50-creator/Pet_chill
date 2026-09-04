@@ -1,129 +1,210 @@
 /* ===================================
-   MAIN.JS - Enhanced Game Loop
+   MAIN.JS - Retro Game Controller & Loop
    =================================== */
 
-// Get canvas element
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+import { PetEnhanced } from './pet-enhanced.js';
+import { SoundManager } from './sound-manager.js';
+import { Terrain } from './terrain.js';
 
-// Game objects
+// Canvas & Context
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas ? canvas.getContext('2d') : null;
+
+// Game Systems
 let terrain;
 let pet;
 let soundManager;
 let gameRunning = true;
-let frameCount = 0;
+let keysDown = {};
 
-/**
- * Initialize game
- */
-function initGame() {
-    console.log('🎮 Pet Chill Game Initialized');
-    console.log(`Canvas: ${canvas.width}x${canvas.height}`);
-    
-    // Create managers
+export function initGame() {
+    if (!canvas || !ctx) return;
+
+    // Set canvas dimensions to 16:9 retro arcade ratio (800x450)
+    canvas.width = 800;
+    canvas.height = 450;
+
+    // Initialize systems
     soundManager = new SoundManager();
     terrain = new Terrain(canvas);
-    
-    // Create pet dengan terrain
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    pet = new PetEnhanced(canvas, terrain, centerX, centerY);
-    
-    console.log(`✅ Terrain loaded`);
-    console.log(`✅ Pet spawned at (${centerX}, ${centerY})`);
-    console.log('🎮 Controls:');
-    console.log('   SPACE: Pause/Resume');
-    console.log('   M: Toggle Sound');
-    console.log('   +/-: Volume Up/Down');
-    
+
+    // Spawn pet in center of playfield
+    const spawnX = canvas.width / 2;
+    const spawnY = (terrain.fenceTopY + terrain.fenceBottomY) / 2 + 10;
+    pet = new PetEnhanced(canvas, terrain, spawnX, spawnY, soundManager);
+
+    // Setup input listeners
+    setupKeyboardListeners();
+    setupTouchListeners();
+    setupButtonListeners();
+
+    // Start loop
     gameLoop();
 }
 
-/**
- * Main game loop
- */
 function gameLoop() {
     if (!gameRunning) return;
-    
     requestAnimationFrame(gameLoop);
-    frameCount++;
 
-    // ==================== UPDATE ====================
+    // 1. Process player directional input
+    handleMovementInput();
+
+    // 2. Update pet & game state
     pet.update();
 
-    // ==================== RENDER ====================
-    // Clear canvas dengan warna hitam
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // 3. Clear canvas & render frame
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Render terrain (grass + border)
+    // Render terrain, fence, and HUD
     terrain.render();
-    
-    // Render pet
+
+    // Render pet character & dust
     pet.render();
-
-    // ==================== SOUND TRIGGERS ====================
-    // Blink sound setiap beberapa frame
-    if (frameCount % 120 === 0) {
-        soundManager.playBlink();
-    }
-    
-    // Footstep sound saat walking
-    if (pet.moving && frameCount % 10 === 0) {
-        soundManager.playFootstep();
-    }
-    
-    // Idle sound
-    if (!pet.moving && frameCount % 300 === 0) {
-        soundManager.playIdle();
-    }
-
-    // ==================== OPTIONAL DEBUG INFO ====================
-    // renderDebugInfo();
 }
 
-/**
- * Debug info render
- */
-function renderDebugInfo() {
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.font = '12px monospace';
-    ctx.fillText(`Frame: ${frameCount}`, 10, 20);
-    ctx.fillText(`Pet: (${Math.round(pet.x)}, ${Math.round(pet.y)})`, 10, 35);
-    ctx.fillText(`State: ${pet.isWalking ? 'WALKING' : 'IDLE'}`, 10, 50);
-    ctx.fillText(`Eyes: ${pet.eyeState}`, 10, 65);
-    ctx.fillText(`Moving: ${pet.moving}`, 10, 80);
+function handleMovementInput() {
+    let dx = 0;
+    let dy = 0;
+
+    if (keysDown['ArrowLeft'] || keysDown['KeyA']) dx -= 1;
+    if (keysDown['ArrowRight'] || keysDown['KeyD']) dx += 1;
+    if (keysDown['ArrowUp'] || keysDown['KeyW']) dy -= 1;
+    if (keysDown['ArrowDown'] || keysDown['KeyS']) dy += 1;
+
+    if (dx !== 0 || dy !== 0) {
+        // Normalize diagonal
+        if (dx !== 0 && dy !== 0) {
+            const factor = 0.7071;
+            dx *= factor;
+            dy *= factor;
+        }
+        pet.setManualMovement(dx, dy);
+    }
 }
 
-/**
- * Keyboard controls
- */
-document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') {
-        e.preventDefault();
-        gameRunning = !gameRunning;
-        console.log(gameRunning ? '▶️ Game resumed' : '⏸️ Game paused');
-        if (gameRunning) gameLoop();
-    }
-    
-    if (e.code === 'KeyM') {
-        soundManager.toggleSound();
-    }
-    
-    if (e.code === 'Equal' || e.code === 'Plus') {
-        soundManager.setVolume(soundManager.masterVolume + 0.1);
-        console.log(`🔊 Volume: ${Math.round(soundManager.masterVolume * 100)}%`);
-    }
-    
-    if (e.code === 'Minus') {
-        soundManager.setVolume(soundManager.masterVolume - 0.1);
-        console.log(`🔊 Volume: ${Math.round(soundManager.masterVolume * 100)}%`);
-    }
-});
+function setupKeyboardListeners() {
+    window.addEventListener('keydown', (e) => {
+        // Space / Pause or Jump
+        if (e.code === 'Space') {
+            e.preventDefault();
+            pet.jump();
+            return;
+        }
 
-/**
- * Start game
- */
+        // 'A' Key or 'KeyZ': JUMP
+        if (e.code === 'KeyJ' || (e.code === 'KeyA' && (keysDown['ArrowUp'] || keysDown['ArrowDown'] || keysDown['ArrowLeft'] || keysDown['ArrowRight']))) {
+            // If arrow keys aren't used for movement, A is Jump
+        }
+        if (e.code === 'KeyZ') {
+            pet.jump();
+            return;
+        }
+
+        // 'B' Key or 'KeyX' or 'KeyE': ACT
+        if (e.code === 'KeyB' || e.code === 'KeyX' || e.code === 'KeyE') {
+            pet.act();
+            return;
+        }
+
+        // 'P': Pause / Resume
+        if (e.code === 'KeyP') {
+            gameRunning = !gameRunning;
+            if (gameRunning) gameLoop();
+            return;
+        }
+
+        // 'M': Toggle Sound
+        if (e.code === 'KeyM') {
+            const enabled = soundManager.toggleSound();
+            updateAudioUI(enabled);
+            return;
+        }
+
+        // '+' or '=': Volume Up
+        if (e.code === 'Equal' || e.code === 'NumpadAdd') {
+            soundManager.adjustVolume(0.1);
+            return;
+        }
+
+        // '-': Volume Down
+        if (e.code === 'Minus' || e.code === 'NumpadSubtract') {
+            soundManager.adjustVolume(-0.1);
+            return;
+        }
+
+        keysDown[e.code] = true;
+    });
+
+    window.addEventListener('keyup', (e) => {
+        delete keysDown[e.code];
+    });
+}
+
+function setupTouchListeners() {
+    if (!canvas) return;
+
+    // Click/Tap on canvas to walk pet or collect coin
+    canvas.addEventListener('pointerdown', (e) => {
+        soundManager.initAudioContext();
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const clickX = (e.clientX - rect.left) * scaleX;
+        const clickY = (e.clientY - rect.top) * scaleY;
+
+        // Calculate direction towards tap
+        const dirX = clickX - pet.x;
+        const dirY = clickY - pet.y;
+        const dist = Math.hypot(dirX, dirY);
+
+        if (dist > 15) {
+            pet.setManualMovement(dirX / dist, dirY / dist);
+        } else {
+            // Tap directly on cat = Pet/Act!
+            pet.act();
+        }
+    });
+}
+
+function setupButtonListeners() {
+    // Jump button (A)
+    const btnJump = document.getElementById('btnJump');
+    if (btnJump) {
+        btnJump.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            soundManager.initAudioContext();
+            pet.jump();
+        });
+    }
+
+    // Act button (B)
+    const btnAct = document.getElementById('btnAct');
+    if (btnAct) {
+        btnAct.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            soundManager.initAudioContext();
+            pet.act();
+        });
+    }
+
+    // Sound toggle button
+    const btnSound = document.getElementById('btnSound');
+    if (btnSound) {
+        btnSound.addEventListener('click', () => {
+            const enabled = soundManager.toggleSound();
+            updateAudioUI(enabled);
+        });
+    }
+}
+
+function updateAudioUI(enabled) {
+    const soundDesc = document.getElementById('soundStatus');
+    if (soundDesc) {
+        soundDesc.textContent = enabled ? 'Sound: ON' : 'Sound: MUTED';
+    }
+}
+
+// Auto bootstrap when loaded
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initGame);
 } else {

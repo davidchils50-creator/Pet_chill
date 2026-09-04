@@ -1,44 +1,45 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐾 Pet Chill - Pixel Art Game</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Pet Chill</title>
+    <meta name="description" content="Retro 16-bit Pixel Art Virtual Pet Game featuring an animated pixel cat, AI wander, jump, and interactive retro HUD." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🐾 Pet Chill</h1>
-            <p>Pixel Art Pet Simulator</p>
+    <div class="arcade-wrapper">
+        <div class="canvas-container">
+            <canvas id="gameCanvas" width="800" height="450"></canvas>
         </div>
 
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <!-- Arcade Control Deck for Mobile & Quick Interaction -->
+        <div class="arcade-deck">
+            <div class="dpad-container">
+                <span class="control-tag">MOVE: ARROWS / WASD</span>
+            </div>
 
-        <div class="controls">
-            <div class="control-item">
-                <span class="key">SPACE</span>
-                <span class="desc">Pause/Resume</span>
+            <div class="deck-actions">
+                <button id="btnJump" class="arcade-btn btn-jump" title="Jump (A / Space / Z)">
+                    <span class="btn-letter">A</span>
+                    <span class="btn-label">JUMP</span>
+                </button>
+                <button id="btnAct" class="arcade-btn btn-act" title="Act / Meow (B / X / E)">
+                    <span class="btn-letter">B</span>
+                    <span class="btn-label">ACT</span>
+                </button>
+                <button id="btnSound" class="arcade-btn btn-audio" title="Toggle Sound / BGM (M)">
+                    <span class="btn-letter">M</span>
+                    <span class="btn-label" id="soundStatus">SOUND</span>
+                </button>
             </div>
-            <div class="control-item">
-                <span class="key">M</span>
-                <span class="desc">Toggle Sound</span>
-            </div>
-            <div class="control-item">
-                <span class="key">+/-</span>
-                <span class="desc">Volume</span>
-            </div>
-        </div>
-
-        <div class="info">
-            <p>Amati pet bergerak acak, mata berkedip, dan interaksi dengan lingkungan! 🌿</p>
         </div>
     </div>
 
-    <!-- Scripts in correct order -->
-    <script src="src/terrain.js"></script>
-    <script src="src/pet-enhanced.js"></script>
-    <script src="src/sound-manager.js"></script>
-    <script src="src/main.js"></script>
+    <!-- Main Game Script Entry -->
+    <script type="module" src="/src/main.js"></script>
 </body>
 </html>
