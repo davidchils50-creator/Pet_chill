@@ -363,28 +363,27 @@ export class PetEnhanced {
         const headBob = isMoving ? Math.sin(walkCycle) * 1.0 : Math.sin(now * 0.003 + 0.4) * 0.6;
 
         // Arm swing & pose calculations
-        let backArmAngle = 0;
-        let frontArmAngle = 0;
-        let armOffsetY = -bodyBob;
+        let leftArmAngle = 0;
+        let rightArmAngle = 0;
+        const shoulderY = -1 - bodyBob;
 
         if (!this.isGrounded) {
-            // Jumping: both hands joyfully raised up high!
-            backArmAngle = -2.2;
-            frontArmAngle = -2.4;
-            armOffsetY -= 2;
+            // Jumping: both hands joyfully raised up high on both sides!
+            leftArmAngle = -2.4;
+            rightArmAngle = 2.4;
         } else if (this.isSpinning) {
             // Spinning Act (B): arms spread out wide celebrating
-            backArmAngle = -1.4;
-            frontArmAngle = 1.4;
+            leftArmAngle = -1.4;
+            rightArmAngle = 1.4;
         } else if (isMoving) {
-            // Walking: natural arm swing opposing legs
-            backArmAngle = Math.sin(walkCycle) * 0.65;
-            frontArmAngle = -Math.sin(walkCycle) * 0.65;
+            // Walking: natural bipedal arm swing opposing legs
+            leftArmAngle = Math.sin(walkCycle) * 0.55;
+            rightArmAngle = -Math.sin(walkCycle) * 0.55;
         } else {
-            // Idle: front paw resting cutely on chest/belly, back paw slightly back
-            const idleBreathe = Math.sin(now * 0.003) * 0.08;
-            backArmAngle = 0.25 + idleBreathe;
-            frontArmAngle = -0.35 - idleBreathe; // bent forward cutely onto chest
+            // Idle: both arms resting cutely and symmetrically on left and right flanks
+            const idleBreathe = Math.sin(now * 0.003) * 0.05;
+            leftArmAngle = 0.12 + idleBreathe;
+            rightArmAngle = -0.12 - idleBreathe;
         }
 
         // ==========================================
@@ -393,29 +392,27 @@ export class PetEnhanced {
         this.drawTail(ctx, -10, 5 - bodyBob);
 
         // ==========================================
-        // 2. LENGAN BELAKANG (BACK ARM & PAW) - Behind body
-        // ==========================================
-        this.drawArm(ctx, -5, 0 + armOffsetY, backArmAngle, true);
-
-        // ==========================================
-        // 3. 2 KAKI (2 BIPEDAL LEGS & FEET)
+        // 2. 2 KAKI (2 BIPEDAL LEGS & FEET)
         // ==========================================
         this.drawLegs(ctx, legStep, bodyBob);
 
         // ==========================================
-        // 4. BADAN (TORSO & WHITE BELLY)
+        // 3. BADAN (TORSO & WHITE BELLY)
         // ==========================================
         this.drawTorso(ctx, bodyBob);
 
         // ==========================================
-        // 5. KEPALA (HEAD, EARS, ANIME EYES, BLUSH)
+        // 4. KEPALA (HEAD, EARS, ANIME EYES, BLUSH)
         // ==========================================
         this.drawHead(ctx, headBob);
 
         // ==========================================
-        // 6. LENGAN DEPAN (FRONT ARM & PAW) - In front of torso
+        // 5. 2 TANGAN (LEFT & RIGHT ARMS SYMMETRICALLY ON FLANKS)
         // ==========================================
-        this.drawArm(ctx, 4, 0 + armOffsetY, frontArmAngle, false);
+        // Left Arm (on left flank of body)
+        this.drawArm(ctx, -11, shoulderY, leftArmAngle, true);
+        // Right Arm (on right flank of body)
+        this.drawArm(ctx, 11, shoulderY, rightArmAngle, false);
     }
 
     // ====================================================
@@ -445,30 +442,30 @@ export class PetEnhanced {
     // ====================================================
     // SUB-ROUTINE: 2 TANGAN (CHIBI ARMS & CUTE WHITE PAWS)
     // ====================================================
-    drawArm(ctx, shoulderX, shoulderY, angle, isBackArm) {
+    drawArm(ctx, shoulderX, shoulderY, angle, isLeft) {
         ctx.save();
         ctx.translate(shoulderX, shoulderY);
         ctx.rotate(angle);
 
+        const offsetX = isLeft ? -2 : -3;
+
         // Proportional chibi arm: ~8px total length
         // Outline
         ctx.fillStyle = '#1e0c05';
-        ctx.fillRect(-2, 0, 5, 8);
-        ctx.fillRect(-1, 8, 3, 2);
+        ctx.fillRect(offsetX, 0, 5, 8);
+        ctx.fillRect(offsetX + 1, 8, 3, 2);
 
         // Orange Upper Arm
-        ctx.fillStyle = isBackArm ? '#d96411' : '#f57c20';
-        ctx.fillRect(-1, 1, 3, 4);
+        ctx.fillStyle = '#f57c20';
+        ctx.fillRect(offsetX + 1, 1, 3, 4);
 
         // Round White Paw / Hand
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-2, 4, 5, 4);
+        ctx.fillRect(offsetX, 4, 5, 4);
 
-        // Tiny Pink Paw Pad on front arm
-        if (!isBackArm) {
-            ctx.fillStyle = '#fda4af';
-            ctx.fillRect(-1, 5, 3, 2);
-        }
+        // Tiny Pink Paw Pad
+        ctx.fillStyle = '#fda4af';
+        ctx.fillRect(offsetX + 1, 5, 3, 2);
 
         ctx.restore();
     }
