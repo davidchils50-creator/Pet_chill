@@ -17,12 +17,20 @@ let soundManager;
 let gameRunning = true;
 let keysDown = {};
 
+let lastTime = 0;
+let frameCount = 0;
+let lastFpsUpdate = 0;
+let currentFps = 60;
+
 export function initGame() {
     if (!canvas || !ctx) return;
 
     // Set canvas dimensions to 16:9 retro arcade ratio (800x450)
     canvas.width = 800;
     canvas.height = 450;
+
+    // High performance 2D context options
+    ctx.imageSmoothingEnabled = false;
 
     // Initialize systems
     soundManager = new SoundManager();
@@ -38,21 +46,40 @@ export function initGame() {
     setupTouchListeners();
     setupButtonListeners();
 
-    // Start loop
-    gameLoop();
+    // Start loop with timestamp
+    lastTime = performance.now();
+    lastFpsUpdate = lastTime;
+    requestAnimationFrame(gameLoop);
 }
 
-function gameLoop() {
+function gameLoop(now) {
     if (!gameRunning) return;
     requestAnimationFrame(gameLoop);
+
+    const currentTime = now || performance.now();
+    const elapsed = currentTime - lastTime;
+    lastTime = currentTime;
+
+    // Calculate delta time factor (1.0 = standard 60fps frame of 16.67ms)
+    // Clamp to [0.5, 2.0] to prevent huge physics jumps on frame spikes
+    const dtFactor = Math.min(2.0, Math.max(0.5, elapsed / 16.667));
+
+    // Calculate rolling FPS
+    frameCount++;
+    if (currentTime - lastFpsUpdate >= 400) {
+        currentFps = Math.round((frameCount * 1000) / (currentTime - lastFpsUpdate));
+        terrain.fps = currentFps;
+        frameCount = 0;
+        lastFpsUpdate = currentTime;
+    }
 
     // 1. Process player directional input
     handleMovementInput();
 
-    // 2. Update pet & game state
-    pet.update();
+    // 2. Update pet & game state with dtFactor
+    pet.update(dtFactor);
 
-    // 3. Clear canvas & render frame
+    // 3. Clear canvas & render frame (Fast Blit)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Render terrain, fence, and HUD

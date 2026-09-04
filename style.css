@@ -47,6 +47,8 @@ body {
     overflow: hidden;
     width: 100%;
     max-width: 800px;
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 #gameCanvas {
@@ -55,11 +57,12 @@ body {
     height: auto;
     aspect-ratio: 16 / 9;
     
-    /* Pixel Perfect Rendering */
+    /* Pixel Perfect Rendering & Hardware Layer */
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     image-rendering: -webkit-optimize-contrast;
     -ms-interpolation-mode: nearest-neighbor;
+    transform: translateZ(0);
 }
 
 /* ==================== ARCADE CONTROL DECK ==================== */
