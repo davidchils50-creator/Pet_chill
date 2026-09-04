@@ -371,22 +371,59 @@ export class PetEnhanced {
         ctx.fillRect(-12, -2, 4, 5);
         ctx.restore();
 
-        // Back Leg
-        ctx.fillStyle = '#1e0c05';
-        ctx.fillRect(-14, 12 + legStep, 10, 8);
-        ctx.fillStyle = '#f57c20';
-        ctx.fillRect(-13, 13 + legStep, 8, 3);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-13, 16 + legStep, 8, 3);
+        // ==================== LEFT ARM & HAND (BACK ARM) ====================
+        ctx.save();
+        let leftArmAngle = 0;
+        let leftArmX = -13;
+        let leftArmY = 0;
 
-        // Front Leg
-        ctx.fillStyle = '#1e0c05';
-        ctx.fillRect(4, 12 - legStep, 10, 8);
-        ctx.fillStyle = '#f57c20';
-        ctx.fillRect(5, 13 - legStep, 8, 3);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(5, 16 - legStep, 8, 3);
+        if (!this.isGrounded) {
+            // Both hands raised up in joy while jumping!
+            leftArmAngle = -0.7;
+            leftArmY = -5;
+            leftArmX = -12;
+        } else if (this.isSpinning) {
+            leftArmAngle = -0.85;
+            leftArmY = -5;
+        } else if (this.isMoving) {
+            leftArmAngle = Math.sin(this.walkFrame * 0.5) * 0.45;
+            leftArmY = Math.sin(this.walkFrame * 0.5) * 2;
+        } else {
+            leftArmAngle = Math.sin(Date.now() * 0.005) * 0.08;
+        }
 
+        ctx.translate(leftArmX, leftArmY);
+        ctx.rotate(leftArmAngle);
+
+        // Left Arm Outline
+        ctx.fillStyle = '#1e0c05';
+        ctx.fillRect(-3, 0, 7, 10);
+        // Orange Arm Fur
+        ctx.fillStyle = '#f57c20';
+        ctx.fillRect(-2, 1, 5, 5);
+        // White Paw / Hand
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-2, 6, 5, 3);
+        ctx.restore();
+
+        // ==================== 2 WALKING LEGS / FEET ====================
+        // Left Leg / Foot
+        ctx.fillStyle = '#1e0c05';
+        ctx.fillRect(-12, 12 + legStep, 9, 8);
+        ctx.fillStyle = '#f57c20';
+        ctx.fillRect(-11, 13 + legStep, 7, 3);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-11, 16 + legStep, 7, 3);
+
+        // Right Leg / Foot
+        ctx.fillStyle = '#1e0c05';
+        ctx.fillRect(3, 12 - legStep, 9, 8);
+        ctx.fillStyle = '#f57c20';
+        ctx.fillRect(4, 13 - legStep, 7, 3);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(4, 16 - legStep, 7, 3);
+
+        // ==================== BODY & HEAD ====================
         // Body Outline
         ctx.fillStyle = '#1e0c05';
         ctx.fillRect(-19, -15, 38, 28);
@@ -410,6 +447,44 @@ export class PetEnhanced {
         ctx.fillRect(-3, -13, 14, 24);
         ctx.fillStyle = '#e2e8f0';
         ctx.fillRect(-3, 7, 14, 4);
+
+        // ==================== RIGHT ARM & HAND (FRONT ARM) ====================
+        ctx.save();
+        let rightArmAngle = 0;
+        let rightArmX = 8;
+        let rightArmY = 0;
+
+        if (!this.isGrounded) {
+            // Both hands raised up in joy!
+            rightArmAngle = 0.7;
+            rightArmY = -5;
+            rightArmX = 9;
+        } else if (this.isSpinning) {
+            rightArmAngle = 0.85;
+            rightArmY = -5;
+        } else if (this.isMoving) {
+            rightArmAngle = -Math.sin(this.walkFrame * 0.5) * 0.45;
+            rightArmY = -Math.sin(this.walkFrame * 0.5) * 2;
+        } else {
+            rightArmAngle = -Math.sin(Date.now() * 0.005) * 0.08;
+        }
+
+        ctx.translate(rightArmX, rightArmY);
+        ctx.rotate(rightArmAngle);
+
+        // Right Arm Outline
+        ctx.fillStyle = '#1e0c05';
+        ctx.fillRect(-2, 0, 7, 10);
+        // Orange Arm Fur
+        ctx.fillStyle = '#f57c20';
+        ctx.fillRect(-1, 1, 5, 5);
+        // White Paw / Hand
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-1, 6, 5, 3);
+        // Tiny cute pink paw pad
+        ctx.fillStyle = '#fda4af';
+        ctx.fillRect(0, 7, 3, 1);
+        ctx.restore();
 
         // Ears
         ctx.fillStyle = '#1e0c05';
