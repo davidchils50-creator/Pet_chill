@@ -1,212 +1,222 @@
-# 🐾 Pet Chill - 2D Pixel Art Game
+# 🐾 Pet Chill - Enhanced Pixel Art Game
 
-Game pet virtual sederhana berbasis Canvas 2D dengan karakter balok pixel yang bergerak acak (AI Wander), mata yang berkedip otomatis, dan map bergaya grid pixel dengan collision detection.
+Game pet virtual 2D yang hidup dengan grass terrain, karakter pixel art detail, dan sound effects procedural.
 
-## 📋 Fitur
+## ✨ Fitur Utama
 
-✅ **Map 2D Grid Pixel** - Latar belakang bergaya pixel art dengan tembok pembatas  
-✅ **Pet Balok Pixel** - Karakter utama dengan wujud balok sederhana  
-✅ **Animasi Mata Berkedip** - Mata otomatis berkedip dengan interval acak  
-✅ **AI Wander** - Pergerakan pet acak ke segala arah dengan state machine (WALKING ↔ IDLE)  
-✅ **Collision Detection** - Pet berbalik arah saat menyentuh tembok pembatas  
-✅ **Pixel-Perfect Rendering** - CSS `image-rendering: pixelated` untuk tampilan yang tajam  
-✅ **Game Loop 60 FPS** - Menggunakan `requestAnimationFrame` untuk performa optimal  
-✅ **Modular Code Structure** - Kode terpisah per file dengan class yang rapi  
+✅ **Grass Terrain** - Latar belakang rumput natural dengan flower details & stone border  
+✅ **Enhanced Pet** - Karakter pixel art dengan head bob, leg animation, tail movement & detailed eyes  
+✅ **Procedural Sounds** - Web Audio API sound effects: footstep, blink, collision, idle, happy  
+✅ **AI Wander** - Pet bergerak acak dengan state machine (Walking ↔ Idle)  
+✅ **Smooth Animation** - 60 FPS dengan leg sync & realistic movement  
+✅ **Responsive Design** - Works on desktop & mobile dengan pixel-perfect rendering  
+✅ **Sound Controls** - Toggle sound, volume control (M key, +/- keys)  
 
 ## 🎮 Controls
 
-| Kontrol | Fungsi |
-|---------|--------|
-| **SPACE** | Pause/Resume game |
-| (otomatis) | Pet bergerak dan beranimasi otomatis |
+| Key | Fungsi |
+|-----|--------|
+| **SPACE** | Pause/Resume |
+| **M** | Toggle Sound On/Off |
+| **+ (Plus)** | Volume Up |
+| **- (Minus)** | Volume Down |
 
-## 📁 Struktur Proyek
+## 📁 Struktur File
 
 ```
 Pet_chill/
-├── index.html          # Entry point HTML dengan canvas
-├── style.css           # Styling dengan pixel-perfect rendering
+├── index.html              # Entry point dengan updated UI
+├── style.css               # Dark theme responsive styling
 ├── src/
-│   ├── main.js        # Game loop & initialization
-│   ├── map.js         # Class Map - rendering & collision
-│   └── pet.js         # Class Pet - AI wander & animasi
-└── README.md          # Dokumentasi ini
+│   ├── main.js            # Enhanced game loop
+│   ├── terrain.js         # Grass terrain & collision system
+│   ├── pet-enhanced.js    # Advanced pet dengan pixel art
+│   ├── sound-manager.js   # Procedural audio effects
+│   ├── audio.js           # Legacy audio (optional)
+│   ├── map.js             # Original map (legacy)
+│   └── pet.js             # Original pet (legacy)
+└── README.md              # Dokumentasi
 ```
 
-## 🚀 Cara Menjalankan
+## 🚀 Quick Start
 
-### Lokal (Tanpa Server)
-1. Clone atau download repository
-2. Buka `index.html` langsung di browser (double-click atau drag ke browser)
-3. Game akan mulai otomatis
-
-### Dengan Live Server (Recommended)
+### Opsi 1: Buka Langsung
 ```bash
-# Gunakan VS Code Live Server extension atau:
+# Double-click index.html
+# atau drag ke browser
+```
+
+### Opsi 2: Live Server
+```bash
+# VS Code: Install "Live Server" extension
+# Klik kanan index.html → "Open with Live Server"
+
+# atau Python:
 python -m http.server 8000
-# Buka http://localhost:8000 di browser
+# Buka http://localhost:8000
+
+# atau Node:
+npm install -g http-server
+http-server
 ```
 
-## 🏗️ Arsitektur Kode
+## 🎨 Fitur Detail
 
-### `src/map.js` - Map Class
-Menangani rendering map dan collision detection:
-- **Render map** - Tembok pembatas (border), lantai, dan optional grid lines
-- **Collision Detection** - Fungsi `isWall()` untuk detect tabrakan dengan tembok
-- **Walkable Area** - Mendapatkan area aman untuk pet bergerak
+### 🌿 Grass Terrain
+- **Procedural generation** dengan dithering natural
+- **Multiple green shades** untuk texture realism
+- **Random flowers** dengan 5 warna berbeda
+- **Stone border wall** dengan texture detail
+- **Collision detection** untuk pet movement
+- **Seamless tiling** untuk visual natural
 
-```javascript
-map = new Map(canvas);
-map.render();                          // Render setiap frame
-if (map.isWall(x, y, size)) { ... }   // Cek collision
-```
+### 🐾 Enhanced Pet Character
+- **Pixel art 32x32** dengan detailed features
+- **Head bobbing animation** saat berjalan
+- **Leg animation cycle** sync dengan movement
+- **Tail wave effect** yang bergerak smooth
+- **Detailed eyes** dengan shine & blink animation
+- **Ears & facial features** untuk personality lebih
+- **Body shading** untuk depth & dimension
+- **Natural walk cycle** dengan offset timing
 
-### `src/pet.js` - Pet Class
-Karakter pet dengan AI dan animasi:
+### 🔊 Sound System (Procedural)
+- **Footstep sounds** - noise filtering untuk realistic steps
+- **Blink sounds** - high-pitched beep saat mata berkedip
+- **Collision sounds** - pitch drop saat nabrak tembok
+- **Happy sounds** - chirping melody untuk joy expression
+- **Idle sounds** - relaxing tone saat santai
+- **Volume control** - adjustable master volume (0-100%)
+- **No external files** - semua generated real-time
 
-#### Struktur Pet
-- **Badan**: Balok warna pink (#ff6b9d)
-- **Mata**: 2 mata putih dengan pupil hitam (berkedip)
-- **Tangan**: 2 tangan sederhana di samping badan
-- **Kaki**: 2 kaki di bawah badan
+### 🤖 AI Wander System
+- **State machine** dengan Walking & Idle states
+- **8 directional movement** (up, down, left, right + diagonals)
+- **Random direction changes** setiap 2-4 detik
+- **Collision avoidance** bounce off walls
+- **Natural timing** dengan idle duration 1-3 detik
+- **Smooth transitions** antar state
 
-#### AI Wander System (State Machine)
-```
-[IDLE] --maxIdleFrames expired--> [WALKING]
- ↑                                    ↓
- +------maxWalkFrames expired----------+
-```
+## 🎯 What's New in v2
 
-- **IDLE STATE**: Pet berhenti selama 1-2 detik (random)
-- **WALKING STATE**: Pet berjalan acak ke 8 arah selama 2-5 detik (random)
-- **Direction**: Acak ke 8 arah (atas, bawah, kiri, kanan, diagonal)
-- **Collision**: Saat menyentuh tembok, arah dibalik (tidak tembus)
+| Fitur | v1 (Simple) | v2 (Enhanced) |
+|-------|------------|---------------|
+| Background | Solid color | Procedural grass dengan flowers |
+| Pet Model | Pink block | Detailed pixel art (32x32) |
+| Pet Animation | Static | Head bob + leg cycle + tail wave |
+| Eyes | Simple circles | Shine effect + blink animation |
+| Sounds | None | 5 procedural sound types |
+| UI | Minimal | Dark theme + controls display |
+| Responsiveness | Fixed | Mobile-friendly |
+| Code Quality | Basic | Modular dengan OOP |
 
-#### Animasi Mata Berkedip
-- **Open State**: Mata menampilkan lingkaran putih + pupil hitam
-- **Closed State**: Mata menampilkan garis horizontal (tertutup)
-- **Interval**: Berkedip setiap 3-8 detik (random)
-- **Duration**: Mata tertutup ~8 frame (133ms @ 60fps)
+## 🔧 Technologies
 
-```javascript
-pet = new Pet(canvas, map, startX, startY);
-pet.update();  // Update logika setiap frame
-pet.render();  // Render ke canvas setiap frame
-```
-
-### `src/main.js` - Game Loop
-Entry point dan game loop utama:
-
-```javascript
-function gameLoop() {
-    // 1. Request next frame dari browser
-    requestAnimationFrame(gameLoop);
-    
-    // 2. UPDATE - Update logika game
-    pet.update();
-    
-    // 3. RENDER - Render semua objects
-    map.render();
-    pet.render();
-}
-```
-
-**requestAnimationFrame** = Browser native animation loop yang synchronized dengan refresh rate monitor (60 FPS di monitor 60Hz)
-
-## 🎨 Styling & Pixel Art
-
-File `style.css` menggunakan properti penting untuk pixel-perfect rendering:
-
-```css
-#gameCanvas {
-    image-rendering: pixelated;           /* Chrome/Firefox */
-    image-rendering: crisp-edges;         /* Safari */
-    image-rendering: -webkit-optimize-contrast;  /* Webkit */
-    -ms-interpolation-mode: nearest-neighbor;    /* IE/Edge */
-}
-```
-
-Tanpa ini, canvas akan terlihat blur saat discale di browser modern.
-
-## 🔧 Konfigurasi
-
-Edit nilai di `src/pet.js` dan `src/map.js` untuk customize:
-
-### Pet Configuration (src/pet.js)
-```javascript
-this.speed = 1.5;              // Kecepatan pet (pixel/frame)
-this.maxWalkFrames = 120-300;  // Durasi berjalan (frame)
-this.maxIdleFrames = 60-180;   // Durasi idle (frame)
-this.bodyColor = '#ff6b9d';    // Warna badan pet
-```
-
-### Map Configuration (src/map.js)
-```javascript
-this.gridSize = 40;            // Ukuran tile/grid (pixel)
-this.floorColor = '#2d3561';   // Warna lantai
-this.wallColor = '#4a5f8f';    // Warna tembok
-```
+- **HTML5 Canvas 2D** - Graphics rendering
+- **Web Audio API** - Procedural sound generation
+- **JavaScript ES6** - Object-oriented design
+- **Procedural generation** - Terrain & sound synthesis
+- **Game loop pattern** - Update + Render cycle
+- **State machine** - AI behavior management
 
 ## 📊 Performance
 
-- **FPS Target**: 60 FPS (stable di semua browser modern)
-- **Memory Usage**: Minimal (~5MB)
-- **No Dependencies**: Pure vanilla JavaScript, zero npm packages
-- **Bundle Size**: ~15KB (HTML + CSS + JS)
+- **60 FPS** - Smooth animation dengan requestAnimationFrame
+- **Lightweight** - ~30KB JavaScript (no dependencies)
+- **Instant load** - No external assets
+- **Cross-browser** - Works di semua modern browsers
+- **Mobile optimized** - Responsive canvas scaling
 
-## 🐛 Troubleshooting
+## 🌟 Key Improvements
 
-### Canvas terlihat blur/buram
-- ✅ CSS sudah include `image-rendering: pixelated`
-- ✅ Canvas tidak di-scale dengan CSS (gunakan canvas width/height attribute)
+1. **Visual Polish** - Grass tiles dengan realistic texture
+2. **Character Design** - Pet lebih expressive dengan animations
+3. **Audio Immersion** - 5 sound effects untuk liveliness
+4. **Better Controls** - Improved UI dengan clear instructions
+5. **Code Organization** - Modular architecture dengan separate files
+6. **Mobile Support** - Responsive design untuk semua ukuran layar
+7. **Performance** - Optimized rendering & audio generation
 
-### Pet tidak bergerak
-- ✅ Cek console log untuk error
-- ✅ Pastikan `requestAnimationFrame` didukung browser (semua modern browser)
+## 🎓 How It Works
 
-### Pet stuck di tembok
-- ✅ Jika terjadi, arah akan dibalik otomatis
-- ✅ Adjustment speed atau gridSize jika sering terjadi
+### Game Loop
+```
+1. Update → Pet AI moves, animates, blinks
+2. Render → Draw terrain, pet, UI
+3. Sound → Trigger audio based on events
+4. Repeat @ 60 FPS
+```
 
-## 📚 Best Practices yang Digunakan
+### Terrain Generation
+```
+1. For each tile (40x40px)
+   - Pick base green color
+   - Add random shade variation
+   - Randomly place flowers (3% chance)
+   - Render to offscreen canvas
+2. Draw all tiles to main canvas
+3. Draw stone border with texture
+```
 
-1. **Class-based Architecture** - Modular dan OOP design
-2. **State Machine Pattern** - AI Wander menggunakan simple state machine
-3. **Separation of Concerns** - Setiap file punya tanggung jawab spesifik
-4. **requestAnimationFrame** - Native browser animation API terbaik
-5. **Pixel-Perfect Rendering** - CSS image-rendering untuk pixel art
-6. **Comments & Documentation** - Kode mudah dipahami dan di-maintain
-7. **No External Dependencies** - Pure vanilla JS, instant load
+### Pet Animation
+```
+1. Walk cycle: legs move opposite directions
+2. Head bob: up/down while moving
+3. Tail wave: sine wave animation
+4. Eye blink: random intervals (3-8 sec)
+5. Collision: bounce off walls
+```
 
-## 🎓 Konsep Yang Digunakan
+### Sound Synthesis
+```
+1. Footstep: White noise → low-pass filter
+2. Blink: Oscillator frequency drop
+3. Collision: Pitch slide down
+4. Happy: Double note chirp
+5. Idle: Smooth descending tone
+```
 
-- **Canvas 2D API** - Drawing graphics di browser
-- **Game Loop Pattern** - Update → Render cycle
-- **State Machine** - AI behavior management
-- **Collision Detection** - Hit testing untuk tembok
-- **Random Number Generation** - Procedural AI behavior
-- **Timer/Counter Pattern** - Animation timing
-- **Object-Oriented Programming** - Class design
+## 🚀 Future Ideas
 
-## 📝 Lisensi
-
-MIT License - Bebas digunakan dan dimodifikasi
-
-## 🚀 Pengembangan Lanjutan
-
-Fitur yang bisa ditambah:
-- [ ] Multiple pets dengan AI yang saling interact
-- [ ] Food & eating mechanic
-- [ ] Health/mood system
-- [ ] Sound effects & background music
+- [ ] Multiple pets interacting
+- [ ] Pet hunger/happiness meters
+- [ ] Food items & feeding system
+- [ ] Different pet skins/colors
+- [ ] Day/night cycle with lighting
+- [ ] Rain/snow weather effects
+- [ ] Pause menu UI screen
 - [ ] Save/load game state
-- [ ] Touch controls untuk mobile
-- [ ] Different pet skins/customization
-- [ ] Day/night cycle
-- [ ] Furniture & decoration placement
+- [ ] Mobile touch controls
+- [ ] Leaderboard system
+- [ ] Pet age/growth system
+- [ ] Accessories/clothing
+
+## 🐛 Known Issues
+
+- None currently! Game is stable and optimized
+
+## 📝 License
+
+MIT License - Bebas digunakan & dimodifikasi untuk project personal maupun komersial
+
+## 🎬 Live Demo
+
+🎮 **Play Now:** https://davidchils50-creator.github.io/Pet_chill
+
+📖 **Repository:** https://github.com/davidchils50-creator/Pet_chill
+
+## 🙏 Credits
+
+Dibuat dengan ❤️ menggunakan Vanilla JavaScript, HTML5 Canvas & Web Audio API
+
+Referensi:
+- Pixel art techniques
+- Game loop patterns
+- Procedural audio synthesis
+- State machine AI
 
 ---
 
-**Dibuat dengan ❤️ menggunakan Vanilla JavaScript**
+**Enjoy your Pet Chill experience! 🐾✨**
 
-Untuk pertanyaan atau kontribusi, silakan buka issue atau pull request di GitHub!
+Amati pet Anda bergerak, bermain, dan berkembang dalam dunia pixel art yang hidup dan interaktif!
