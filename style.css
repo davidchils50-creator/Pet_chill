@@ -1,5 +1,5 @@
 /* ===================================
-   STYLE.CSS - Styling untuk Pet Chill
+   STYLE.CSS - Pixel Perfect Styling
    =================================== */
 
 * {
@@ -9,7 +9,7 @@
 }
 
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Arial', 'Courier New', monospace;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     display: flex;
     justify-content: center;
@@ -19,69 +19,155 @@ body {
 }
 
 .container {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    background: rgba(0, 0, 0, 0.3);
     padding: 30px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.header {
     text-align: center;
-    max-width: 900px;
+    color: white;
 }
 
-h1 {
-    color: #764ba2;
-    margin-bottom: 20px;
+.header h1 {
     font-size: 2.5em;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 5px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* Canvas Styling dengan pixel-perfect rendering */
+.header p {
+    font-size: 1em;
+    opacity: 0.9;
+}
+
+/* ==================== CANVAS ====================*/
 #gameCanvas {
-    border: 4px solid #764ba2;
-    background-color: #1a1a2e;
     display: block;
-    margin: 0 auto 20px;
+    border: 4px solid #fff;
+    background: #000;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     
-    /* PENTING: image-rendering: pixelated untuk pixel art 
-       memastikan pixel tetap tajam tanpa anti-aliasing */
+    /* Pixel perfect rendering - sangat penting! */
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     image-rendering: -webkit-optimize-contrast;
-    
-    /* Smooth scaling untuk layar besar */
-    width: 100%;
-    max-width: 800px;
-    height: auto;
-    
-    /* Jangan blur/interpolate saat scaling */
     -ms-interpolation-mode: nearest-neighbor;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    
+    /* Anti-scaling blur */
+    width: 800px;
+    height: 600px;
+    max-width: 100%;
 }
 
+/* ==================== CONTROLS ====================*/
+.controls {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.control-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 0.9em;
+}
+
+.key {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    min-width: 50px;
+    text-align: center;
+}
+
+.desc {
+    opacity: 0.9;
+}
+
+/* ==================== INFO ====================*/
 .info {
-    background: #f0f0f0;
-    padding: 15px;
-    border-radius: 10px;
-    color: #333;
-    line-height: 1.6;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
     font-size: 0.95em;
+    max-width: 600px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px 20px;
+    border-radius: 8px;
+    border-left: 3px solid #ffd700;
 }
 
-.info p {
-    margin: 0;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .container {
-        padding: 20px;
-    }
-
-    h1 {
-        font-size: 1.8em;
-        margin-bottom: 15px;
-    }
-
+/* ==================== RESPONSIVE ====================*/
+@media (max-width: 900px) {
     #gameCanvas {
-        border: 3px solid #764ba2;
+        width: 100%;
+        height: auto;
+        max-width: 90vw;
     }
+    
+    .header h1 {
+        font-size: 2em;
+    }
+    
+    .controls {
+        gap: 10px;
+    }
+    
+    .control-item {
+        padding: 8px 12px;
+        font-size: 0.85em;
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+        gap: 15px;
+    }
+    
+    #gameCanvas {
+        width: 100%;
+    }
+    
+    .header h1 {
+        font-size: 1.5em;
+    }
+    
+    .controls {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .control-item {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* ==================== ANIMATIONS ====================*/
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+#gameCanvas:hover {
+    animation: pulse 2s ease-in-out infinite;
 }
