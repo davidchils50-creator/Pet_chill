@@ -1,12 +1,15 @@
 /* ===================================
-   PET.JS - Class Pet dengan AI Wander
+   PET.JS - Class Pet dengan AI Wander & SNN Brain
    =================================== */
 
-class Pet {
+import { Brain } from './brain.js';
+
+export class Pet {
     constructor(canvas, map, startX, startY) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.map = map;
+        this.brain = new Brain();
 
         // Posisi & ukuran
         this.x = startX;
@@ -36,7 +39,55 @@ class Pet {
         this.bodyColor = '#ff6b9d'; // Pink/merah muda cerah
         this.bodyColorDark = '#d63384'; // Warna lebih gelap untuk kontras
 
+        // Drag and Drop (State Diangkat)
+        this.isPickedUp = false;
+        this.dragOffsetX = 0;
+        this.dragOffsetY = 0;
+        this.pickupFrame = 0;
+
         // Randomisasi awal
+        this.changeDirection();
+    }
+
+    /**
+     * Start Dragging Pet
+     */
+    startDrag(pointerX, pointerY) {
+        const dx = pointerX - this.x;
+        const dy = pointerY - this.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist <= this.size || (Math.abs(dx) <= this.size / 2 && Math.abs(dy) <= this.size / 2)) {
+            this.isPickedUp = true;
+            this.isWalking = false;
+            this.directionX = 0;
+            this.directionY = 0;
+            this.pickupFrame = 0;
+            this.dragOffsetX = this.x - pointerX;
+            this.dragOffsetY = this.y - pointerY;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Move Dragging Pet
+     */
+    onDragMove(pointerX, pointerY) {
+        if (!this.isPickedUp) return;
+        const newX = pointerX + this.dragOffsetX;
+        const newY = pointerY + this.dragOffsetY;
+
+        this.x = Math.max(30, Math.min(this.canvas.width - 30, newX));
+        this.y = Math.max(40, Math.min(this.canvas.height - 40, newY));
+    }
+
+    /**
+     * Release Pet
+     */
+    releaseDrag() {
+        if (!this.isPickedUp) return;
+        this.isPickedUp = false;
         this.changeDirection();
     }
 
@@ -89,6 +140,11 @@ class Pet {
      * Update logika pet setiap frame
      */
     update() {
+        if (this.isPickedUp) {
+            this.pickupFrame++;
+            return;
+        }
+
         // ==================== UPDATE PERGERAKAN ====================
         if (this.isWalking) {
             this.walkDuration++;
@@ -150,6 +206,9 @@ class Pet {
         const x = this.x;
         const y = this.y;
 
+        // Swing factors when picked up
+        const swing = this.isPickedUp ? Math.sin(this.pickupFrame * 0.35) * 5 : 0;
+
         // ==================== BADAN BALOK ====================
         ctx.fillStyle = this.bodyColor;
         ctx.fillRect(x - size / 2, y - size / 2, size, size);
@@ -178,11 +237,11 @@ class Pet {
 
         ctx.fillStyle = this.bodyColorDark;
         
-        // Tangan kiri
-        ctx.fillRect(x - handOffsetX - handWidth / 2, y + handOffsetY, handWidth, handHeight);
+        // Tangan kiri (mengayun jika diangkat)
+        ctx.fillRect(x - handOffsetX - handWidth / 2, y + handOffsetY - swing, handWidth, handHeight);
         
-        // Tangan kanan
-        ctx.fillRect(x + handOffsetX - handWidth / 2, y + handOffsetY, handWidth, handHeight);
+        // Tangan kanan (mengayun berlawanan jika diangkat)
+        ctx.fillRect(x + handOffsetX - handWidth / 2, y + handOffsetY + swing, handWidth, handHeight);
 
         // ==================== KAKI (2 buah) ====================
         const footWidth = 8;
@@ -193,10 +252,10 @@ class Pet {
         ctx.fillStyle = this.bodyColorDark;
         
         // Kaki kiri
-        ctx.fillRect(x - footOffsetX - footWidth / 2, y + footOffsetY, footWidth, footHeight);
+        ctx.fillRect(x - footOffsetX - footWidth / 2, y + footOffsetY + swing, footWidth, footHeight);
         
         // Kaki kanan
-        ctx.fillRect(x + footOffsetX - footWidth / 2, y + footOffsetY, footWidth, footHeight);
+        ctx.fillRect(x + footOffsetX - footWidth / 2, y + footOffsetY - swing, footWidth, footHeight);
     }
 
     /**

@@ -160,6 +160,253 @@ export class SoundManager {
         }
     }
 
+    playFeed() {
+        if (!this.soundEnabled) return;
+        this.initAudioContext();
+        if (!this.audioContext) return;
+
+        try {
+            const now = this.audioContext.currentTime;
+            // Cute crunchy eating chiptune sound (2 rapid bites)
+            [0, 0.09].forEach((delay) => {
+                const osc = this.audioContext.createOscillator();
+                const gain = this.audioContext.createGain();
+                osc.type = 'triangle';
+                osc.connect(gain);
+                gain.connect(this.audioContext.destination);
+
+                osc.frequency.setValueAtTime(440 + Math.random() * 60, now + delay);
+                osc.frequency.exponentialRampToValueAtTime(780, now + delay + 0.07);
+
+                gain.gain.setValueAtTime(this.masterVolume * 0.25, now + delay);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.07);
+
+                osc.start(now + delay);
+                osc.stop(now + delay + 0.07);
+            });
+        } catch (e) {
+            console.warn('Feed sound error:', e);
+        }
+    }
+
+    playPraise() {
+        if (!this.soundEnabled) return;
+        this.initAudioContext();
+        if (!this.audioContext) return;
+
+        try {
+            const now = this.audioContext.currentTime;
+            // Warm affectionate purr / happy ascending arpeggio
+            [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                const osc = this.audioContext.createOscillator();
+                const gain = this.audioContext.createGain();
+                osc.type = 'sine';
+                osc.connect(gain);
+                gain.connect(this.audioContext.destination);
+
+                const t = now + i * 0.07;
+                osc.frequency.setValueAtTime(freq, t);
+                gain.gain.setValueAtTime(this.masterVolume * 0.22, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.12);
+
+                osc.start(t);
+                osc.stop(t + 0.12);
+            });
+        } catch (e) {
+            console.warn('Praise sound error:', e);
+        }
+    }
+
+    playScold() {
+        if (!this.soundEnabled) return;
+        this.initAudioContext();
+        if (!this.audioContext) return;
+
+        try {
+            const now = this.audioContext.currentTime;
+            // Sad / startled low tone
+            const osc = this.audioContext.createOscillator();
+            const gain = this.audioContext.createGain();
+            osc.type = 'sawtooth';
+            osc.connect(gain);
+            gain.connect(this.audioContext.destination);
+
+            osc.frequency.setValueAtTime(260, now);
+            osc.frequency.linearRampToValueAtTime(140, now + 0.25);
+
+            gain.gain.setValueAtTime(this.masterVolume * 0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+            osc.start(now);
+            osc.stop(now + 0.25);
+        } catch (e) {
+            console.warn('Scold sound error:', e);
+        }
+    }
+
+    playSplash() {
+        if (!this.soundEnabled) return;
+        this.initAudioContext();
+        if (!this.audioContext) return;
+
+        try {
+            const now = this.audioContext.currentTime;
+            // Cute bubbly water splash sound (FM frequency modulation + sine burst)
+            [0, 0.05, 0.1].forEach((delay, idx) => {
+                const osc = this.audioContext.createOscillator();
+                const gain = this.audioContext.createGain();
+                osc.type = 'sine';
+                osc.connect(gain);
+                gain.connect(this.audioContext.destination);
+
+                const baseFreq = 400 + idx * 180 + Math.random() * 50;
+                osc.frequency.setValueAtTime(baseFreq, now + delay);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.8, now + delay + 0.06);
+
+                gain.gain.setValueAtTime(this.masterVolume * 0.22, now + delay);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.08);
+
+                osc.start(now + delay);
+                osc.stop(now + delay + 0.08);
+            });
+        } catch (e) {
+            console.warn('Splash sound error:', e);
+        }
+    }
+
+    playPickup() {
+        if (!this.soundEnabled) return;
+        this.initAudioContext();
+        if (!this.audioContext) return;
+
+        try {
+            const now = this.audioContext.currentTime;
+            // Cheerful ascending squeak
+            const osc = this.audioContext.createOscillator();
+            const gain = this.audioContext.createGain();
+            osc.type = 'sine';
+            osc.connect(gain);
+            gain.connect(this.audioContext.destination);
+
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.exponentialRampToValueAtTime(740, now + 0.12);
+
+            gain.gain.setValueAtTime(this.masterVolume * 0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+
+            osc.start(now);
+            osc.stop(now + 0.12);
+        } catch (e) {
+            console.warn('Pickup sound error:', e);
+        }
+    }
+
+    playDrop() {
+        if (!this.soundEnabled) return;
+        this.initAudioContext();
+        if (!this.audioContext) return;
+
+        try {
+            const now = this.audioContext.currentTime;
+            const osc = this.audioContext.createOscillator();
+            const gain = this.audioContext.createGain();
+            osc.type = 'triangle';
+            osc.connect(gain);
+            gain.connect(this.audioContext.destination);
+
+            osc.frequency.setValueAtTime(180, now);
+            osc.frequency.exponentialRampToValueAtTime(45, now + 0.1);
+
+            gain.gain.setValueAtTime(this.masterVolume * 0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+            osc.start(now);
+            osc.stop(now + 0.1);
+        } catch (e) {
+            console.warn('Drop sound error:', e);
+        }
+    }
+
+    playGunshot() {
+        if (!this.soundEnabled) return;
+        this.initAudioContext();
+        if (!this.audioContext) return;
+
+        try {
+            const ctx = this.audioContext;
+            const now = ctx.currentTime;
+
+            // 1. Transient Explosion Noise Burst (Bubuk mesiu)
+            const bufferSize = Math.floor(ctx.sampleRate * 0.35);
+            const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.04));
+            }
+            const whiteNoise = ctx.createBufferSource();
+            whiteNoise.buffer = noiseBuffer;
+
+            const noiseFilter = ctx.createBiquadFilter();
+            noiseFilter.type = 'lowpass';
+            noiseFilter.frequency.setValueAtTime(3600, now);
+            noiseFilter.frequency.exponentialRampToValueAtTime(250, now + 0.28);
+
+            const noiseGain = ctx.createGain();
+            noiseGain.gain.setValueAtTime(this.masterVolume * 0.85, now);
+            noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+            whiteNoise.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(ctx.destination);
+            whiteNoise.start(now);
+
+            // 2. Heavy Sub-Bass Gunshot Punch Kick
+            const kickOsc = ctx.createOscillator();
+            const kickGain = ctx.createGain();
+            kickOsc.type = 'sine';
+            kickOsc.frequency.setValueAtTime(260, now);
+            kickOsc.frequency.exponentialRampToValueAtTime(30, now + 0.22);
+
+            kickGain.gain.setValueAtTime(this.masterVolume * 0.9, now);
+            kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+            kickOsc.connect(kickGain);
+            kickGain.connect(ctx.destination);
+            kickOsc.start(now);
+            kickOsc.stop(now + 0.26);
+        } catch (e) {
+            console.warn('Gunshot sound error:', e);
+        }
+    }
+
+    playFearScreech() {
+        if (!this.soundEnabled) return;
+        this.initAudioContext();
+        if (!this.audioContext) return;
+
+        try {
+            const ctx = this.audioContext;
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(950, now);
+            osc.frequency.linearRampToValueAtTime(1500, now + 0.08);
+            osc.frequency.exponentialRampToValueAtTime(420, now + 0.35);
+
+            gain.gain.setValueAtTime(this.masterVolume * 0.45, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.4);
+        } catch (e) {
+            console.warn('Fear screech sound error:', e);
+        }
+    }
+
     playBlink() {
         if (!this.soundEnabled) return;
         this.initAudioContext();

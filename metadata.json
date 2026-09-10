@@ -1,0 +1,6 @@
+{
+  "name": "Pet Chill",
+  "description": "Retro 16-bit Pixel Art Virtual Pet game powered by a Neuromorphic Spiking Neural Network (SNN) with HSPC, Sparse Distributed Memory, and unbounded neurogenesis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -2,39 +2,416 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pet Chill</title>
-    <meta name="description" content="Retro 16-bit Pixel Art Virtual Pet Game featuring an animated pixel cat, AI wander, jump, and interactive retro HUD." />
+    <meta name="description" content="Retro 16-bit Pixel Art Virtual Pet game powered by a Neuromorphic Spiking Neural Network (SNN) with HSPC, Sparse Distributed Memory, and unbounded neurogenesis." />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <div class="arcade-wrapper">
-        <div class="canvas-container">
-            <canvas id="gameCanvas" width="800" height="450"></canvas>
+    <div id="gameViewport" class="game-viewport">
+        <!-- Fullscreen Canvas (Map View) -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Fullscreen Real-Time Neuromorphic Brain Visualizer Viewport (Brain View) -->
+        <div id="brainViewContainer" class="brain-view-container hidden">
+            <canvas id="brainCanvas"></canvas>
+
+            <!-- Overlay HUD di dalam Tab Otak SNN (Minimalis & Bebas Halangan) -->
+            <div class="brain-overlay-hud">
+                <!-- Top Status Header Ramping -->
+                <div class="brain-top-nav">
+                    <!-- Status Indikator: Total Neuron (Reset saat reload), Sinapsis Insting, Organ Teraktif, & Kosakata -->
+                    <div class="brain-memory-status-pills">
+                        <span class="mem-pill pill-neurons" title="Total neuron selalu di-reset ke baseline 2.000 fisik saat reload">
+                            🧠 <b id="txtBrainNeuronStatus">2.000 (Reset Saat Reload)</b>
+                        </span>
+                        <span class="mem-pill pill-synapses" title="Sinapsis aktif & sirkuit insting laten bawaan lahir sejak awal hidup">
+                            ⚡ <b id="txtBrainSynapseStatus">3.120.000 Sinapsis Aktif</b>
+                        </span>
+                        <span class="mem-pill pill-active-organ" title="Organ Otak dengan beban kerja tertinggi secara real-time">
+                            🔥 <b id="txtBrainDominantOrgan">ORGAN: AMIGDALA (SIAP)</b>
+                        </span>
+                        <span class="mem-pill pill-vocab" title="Kosakata tersimpan di localStorage browser user dan tidak pernah kereset">
+                            📖 <b id="txtBrainVocabStatus">32 Kata (Tersimpan)</b>
+                        </span>
+                    </div>
+
+                    <!-- Neuromodulators Status Bar Ramping Horizontal -->
+                    <div class="brain-neuromod-inline">
+                        <span class="neuromod-badge badge-dopa" title="Dopamin: Reward & STDP">DOP <b id="txtDopaVal">20%</b></span>
+                        <span class="neuromod-badge badge-cort" title="Kortisol: Stres">COR <b id="txtCortVal">10%</b></span>
+                        <span class="neuromod-badge badge-nore" title="Norepinefrin: Atensi">NOR <b id="txtNoreVal">35%</b></span>
+                        <span class="neuromod-badge badge-sero" title="Serotonin: Ketenangan">SER <b id="txtSeroVal">50%</b></span>
+                        <span class="neuromod-badge badge-achy" title="Asetilkolin: Pembelajaran">ACH <b id="txtAchyVal">40%</b></span>
+                    </div>
+                </div>
+
+                <!-- Floating Single-Neuron Inspector Card (Default HIDDEN, Hanya muncul saat neuron di-klik) -->
+                <div id="neuronInspectorCard" class="neuron-inspector-card hidden">
+                    <div class="insp-header">
+                        <div class="insp-header-left">
+                            <span class="insp-title">🔬 NEURON</span>
+                            <span id="inspNeuronArea" class="insp-area-badge">OUTPUT</span>
+                        </div>
+                        <button id="btnCloseInspector" class="btn-close-insp" title="Tutup Detail (atau klik area kosong)">✕</button>
+                    </div>
+                    <div class="insp-id-row">
+                        <span id="inspNeuronId" class="insp-id">#1820</span>
+                        <span id="inspNeuronStatus" class="insp-status">🟢 READY</span>
+                    </div>
+                    
+                    <!-- Osiloskop Tegangan V(t) -->
+                    <div class="insp-osc-box">
+                        <canvas id="oscCanvas" width="200" height="36"></canvas>
+                    </div>
+
+                    <div class="insp-metrics-grid">
+                        <div class="insp-metric">
+                            <span class="lbl">V:</span>
+                            <span id="inspNeuronV" class="val">0.00 V</span>
+                            <div class="insp-bar-track"><div id="inspBarV" class="insp-bar-fill"></div></div>
+                        </div>
+                        <div class="insp-metric">
+                            <span class="lbl">Vth:</span>
+                            <span id="inspNeuronVth" class="val">1.00 V</span>
+                            <span class="lbl" style="margin-left: 6px;">Hz:</span>
+                            <span id="inspNeuronRate" class="val">0.0</span>
+                        </div>
+                        <div class="insp-metric">
+                            <span class="lbl">SYN:</span>
+                            <span class="val"><span id="inspSynIn">60</span> in / <span id="inspSynOut">60</span> out</span>
+                        </div>
+                    </div>
+
+                    <div class="insp-action-buttons">
+                        <button id="btnInspStimulate" class="btn-insp-action btn-insp-zap" title="Suntik tegangan aksi +1.8V ke neuron ini">
+                            ⚡ STIMULASI (+1.8V)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Real-Time SNN Thought & Stimulus Pill Ramping (Bawah) -->
+                <div class="brain-stimulus-bar">
+                    <div class="brain-thought-monitor">
+                        <span class="thought-lbl">💭</span>
+                        <span id="txtBrainLastThought" class="thought-val">HENING / MENGAMATI</span>
+                    </div>
+                    <div class="brain-stimulus-inputs">
+                        <input id="inputBrainStimulus" type="text" class="brain-stim-input" placeholder="Ketik kata stimulus lalu Enter (cth: 'ikan', 'halo')..." />
+                        <button id="btnInjectStimulus" class="btn-stim-send" title="Suntikkan stimulus ke jaringan sensorik">⚡</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Arcade Control Deck for Mobile & Quick Interaction -->
-        <div class="arcade-deck">
-            <div class="dpad-container">
-                <span class="control-tag">MOVE: ARROWS / WASD</span>
-            </div>
+        <!-- In-Screen Floating UI Overlay -->
+        <div class="game-overlay">
+            <!-- Top Header: Stats, Change Switcher & Pet Status -->
+            <header class="top-hud">
+                <!-- Pet Profile & Mood Card -->
+                <div class="hud-card pet-profile-card">
+                    <div class="cat-avatar-box">
+                        <span class="cat-emoji">🐱</span>
+                    </div>
+                    <div class="profile-info">
+                        <div class="pet-title">PET CHILL</div>
+                        <div class="pet-mood-row">
+                            <span class="mood-lbl">MOOD:</span>
+                            <span id="moodBadge" class="mood-badge">SENANG</span>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="deck-actions">
-                <button id="btnJump" class="arcade-btn btn-jump" title="Jump (A / Space / Z)">
-                    <span class="btn-letter">A</span>
-                    <span class="btn-label">JUMP</span>
-                </button>
-                <button id="btnAct" class="arcade-btn btn-act" title="Act / Meow (B / X / E)">
-                    <span class="btn-letter">B</span>
-                    <span class="btn-label">ACT</span>
-                </button>
-                <button id="btnSound" class="arcade-btn btn-audio" title="Toggle Sound / BGM (M)">
-                    <span class="btn-letter">M</span>
-                    <span class="btn-label" id="soundStatus">SOUND</span>
-                </button>
+                <!-- Floating Center: Tombol Change (Bola Bumi vs Otak Pixel) & Zone Indicator -->
+                <div class="center-nav-group">
+                    <!-- Tombol Change Switcher: Bola Bumi vs Otak Pixel -->
+                    <div class="top-view-switcher-wrap">
+                        <div class="top-view-switcher" id="viewSwitcher">
+                            <button id="btnViewMap" class="view-switch-btn active" title="Tampilan Bola Bumi: Peta & Pergerakan Pet di Dunia">
+                                <span class="pixel-icon-container">
+                                    <!-- Pixel Art Globe / Bola Bumi -->
+                                    <svg class="pixel-art-icon" viewBox="0 0 16 16" width="22" height="22" shape-rendering="crispEdges">
+                                        <path d="M5 1h6v1h2v1h1v2h1v6h-1v2h-1v1h-2v1H5v-1H3v-1H2v-2H1V5h1V3h1V2h2V1z" fill="#0f172a"/>
+                                        <path d="M5 2h6v1h2v2h1v6h-1v2h-2v1H5v-1H3v-2H2V5h1V3h2V2z" fill="#0284c7"/>
+                                        <path d="M6 3h3v1H6zM4 6h2v1H4zM10 9h3v1h-3z" fill="#38bdf8"/>
+                                        <path d="M7 2h3v1h1v1h-2v1H7v1H5v2H4V5h1V3h2V2z M10 6h2v1h1v2h-1v1h-2V9h-1V7h1V6z M5 9h2v1h1v2H7v1H5v-1H4v-2h1V9z" fill="#22c55e"/>
+                                        <path d="M7 3h2v1h-2z M10 7h1v1h-1z M5 10h1v1h-1z" fill="#15803d"/>
+                                        <path d="M6 2h3v1H6z M8 13h2v1H8z" fill="#f8fafc"/>
+                                    </svg>
+                                </span>
+                                <span class="view-btn-text">DUNIA</span>
+                            </button>
+                            <button id="btnViewBrain" class="view-switch-btn" title="Tampilan Otak Pixel: Visual Saraf & Neuron Real-Time">
+                                <span class="pixel-icon-container">
+                                    <!-- Pixel Art Brain / Otak Pixel -->
+                                    <svg class="pixel-art-icon" viewBox="0 0 16 16" width="22" height="22" shape-rendering="crispEdges">
+                                        <path d="M4 1h8v1h2v2h1v7h-1v2h-2v1H9v1H7v-1H4v-1H2v-2H1V4h1V2h2V1z" fill="#0f172a"/>
+                                        <path d="M4 2h8v1h2v2h-1v1h-1v1h-1v1h-1v1h-1v2H8V9H7V8H6V7H5V6H4V5H3V4h1V2z M10 4h2v2h-2V4z M4 4h2v2H4V4z" fill="#ec4899"/>
+                                        <path d="M5 2h2v1H5z M9 2h2v1H9z M3 5h2v1H3z M11 5h2v1h-2z M4 9h2v1H4z M10 9h2v1h-2z" fill="#f472b6"/>
+                                        <path d="M7 3h2v5H7z M5 6h1v2H5z M10 6h1v2h-1z M6 10h4v1H6z" fill="#831843"/>
+                                        <path d="M7 5h2v2H7z M6 6h1v1H6z M9 6h1v1H9z M8 4h1v1H8z M8 7h1v1H8z" fill="#38bdf8"/>
+                                        <rect x="7.5" y="5.5" width="1" height="1" fill="#ffffff"/>
+                                    </svg>
+                                </span>
+                                <span class="view-btn-text">OTAK SNN</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="zoneBadge" class="center-hint-pill zone-pill">
+                        <span id="zoneIcon" class="hint-icon">🏡</span>
+                        <span id="zoneName" class="hint-text">TAMAN UTAMA</span>
+                    </div>
+                    <div id="zoneSubHint" class="center-hint-pill sub-hint">
+                        <span class="hint-icon">🐾</span>
+                        <span class="hint-text">KAMERA MENGIKUTI PET</span>
+                    </div>
+                </div>
+
+                <!-- Top Right Status Bars Card & Sound Button -->
+                <div class="top-right-group">
+                    <div class="hud-card stats-card">
+                        <div class="stat-row">
+                            <span class="stat-name stat-hunger">LAPAR</span>
+                            <div class="stat-bar-track">
+                                <div id="barHunger" class="stat-bar-fill bar-hunger" style="width: 80%;"></div>
+                            </div>
+                            <span id="txtHunger" class="stat-pct">80%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-name stat-happy">SENANG</span>
+                            <div class="stat-bar-track">
+                                <div id="barHappy" class="stat-bar-fill bar-happy" style="width: 85%;"></div>
+                            </div>
+                            <span id="txtHappy" class="stat-pct">85%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-name stat-energy">ENERGI</span>
+                            <div class="stat-bar-track">
+                                <div id="barEnergy" class="stat-bar-fill bar-energy" style="width: 90%;"></div>
+                            </div>
+                            <span id="txtEnergy" class="stat-pct">90%</span>
+                        </div>
+                    </div>
+
+                    <!-- Circular Sound & Study Control Buttons -->
+                    <button id="btnOpenStudyDesk" class="round-btn btn-study" title="Buka Meja Belajar AI (Evolusi, Korpus, LLM Teacher)" aria-label="Buka Meja Belajar AI">
+                        <span class="round-icon">🎓</span>
+                        <span class="btn-tooltip">STUDY</span>
+                    </button>
+                    <button id="btnSound" class="round-btn btn-sound" title="Toggle Sound (M)" aria-label="Toggle Sound">
+                        <span id="soundIcon" class="round-icon">🔊</span>
+                        <span class="btn-tooltip">SOUND</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Bottom Floating Circular Action Buttons & Chat Bar -->
+            <div class="bottom-controls-overlay">
+                <!-- Real-time Auto-Training Indicator Panel -->
+                <div id="training-panel" class="training-panel">
+                    <div class="training-info">
+                        <span class="tr-lbl">🎓 AUTO-TRAINING:</span>
+                        <span>Status: <span id="training-status">Tidak aktif</span></span>
+                        <span>Durasi: <span id="training-timer">00:00</span></span>
+                        <span>Langkah: <span id="training-steps">0</span></span>
+                    </div>
+                    <button id="btnStopTraining" class="btn-stop-training hidden">⏹️ Stop</button>
+                </div>
+
+                <!-- Clean Chat Input Bar -->
+                <div class="chat-input-bar">
+                    <input id="inputTalk" type="text" class="talk-input" placeholder="Bicara / Ajar Pet (cth: 'ajarin MTK', 'Halo', '2+3=')..." maxlength="60" autocomplete="off" />
+                    <button id="btnTalk" class="btn-talk" title="Kirim pesan ke Pet">CHAT 💬</button>
+                </div>
+
+                <!-- Action Buttons (FEED, PET, SCOLD) -->
+                <div class="action-buttons-group">
+                    <!-- Circular Action Button: FEED -->
+                    <button id="btnFeed" class="round-action-btn btn-round-feed" title="Beri Makan Pet (Tekan 1 / F)">
+                        <div class="round-inner">
+                            <span class="action-icon">🍖</span>
+                            <span class="action-label">FEED</span>
+                        </div>
+                        <span class="key-chip">1</span>
+                    </button>
+
+                    <!-- Circular Action Button: PET / PUJI -->
+                    <button id="btnPraise" class="round-action-btn btn-round-praise" title="Puji / Elus Pet (Tekan 2 / E)">
+                        <div class="round-inner">
+                            <span class="action-icon">💖</span>
+                            <span class="action-label">PET</span>
+                        </div>
+                        <span class="key-chip">2</span>
+                    </button>
+
+                    <!-- Circular Action Button: SCOLD -->
+                    <button id="btnScold" class="round-action-btn btn-round-scold" title="Marahi Pet (Tekan 3 / X)">
+                        <div class="round-inner">
+                            <span class="action-icon">💢</span>
+                            <span class="action-label">SCOLD</span>
+                        </div>
+                        <span class="key-chip">3</span>
+                    </button>
+
+                    <!-- Circular Action Button: GUN / SHOOT (Memicu Amigdala & Takut Mati) -->
+                    <button id="btnGun" class="round-action-btn btn-round-gun" title="Tembak Pistol (Tekan 4 / G) - Memicu Amigdala & Ketakutan Maut">
+                        <div class="round-inner">
+                            <span class="action-icon">🔫</span>
+                            <span class="action-label">SHOOT</span>
+                        </div>
+                        <span class="key-chip">4</span>
+                    </button>
+
+                    <!-- Circular Action Button: PENURUT (Obedient Mode Toggle) -->
+                    <button id="btnObedient" class="round-action-btn btn-round-obedient" title="Toggle Mode Penurut & Kepatuhan Belajar (Tekan 5 / O)" aria-pressed="false">
+                        <div class="round-inner">
+                            <span id="iconObedient" class="action-icon">🐾</span>
+                            <span id="txtObedientStatus" class="action-label">PENURUT<span id="txtObedientState" class="obedient-state-pill">OFF</span></span>
+                        </div>
+                        <span class="key-chip">5</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Meja Belajar AI & Laboratorium Pet -->
+    <div id="modalStudyDesk" class="modal-backdrop hidden">
+        <div class="study-desk-card">
+            <div class="modal-header">
+                <div class="header-title">
+                    <span class="modal-icon">🎓</span>
+                    <h3>MEJA BELAJAR & LAB AI PET</h3>
+                </div>
+                <button id="btnCloseStudyDesk" class="btn-close-modal">✕</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Section 1: Evolusi & Neurogenesis -->
+                <div class="lab-section">
+                    <h4>🧬 EVOLUSI OTAK SNN & NEUROGENESIS</h4>
+                    <div class="lab-row">
+                        <div class="lab-info">
+                            <span class="lab-label">Mode Evolusi:</span>
+                            <span id="txtModalMode" class="lab-val highlight">Evolusi Mati</span>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button id="btnModalToggleNeuro" class="btn-lab-action">Evolusi</button>
+                            <button id="btnModalPurgeVocab" class="btn-lab-action" style="background: rgba(239, 68, 68, 0.25); border-color: #ef4444; color: #fca5a5;" title="Hapus dan bersihkan semua kata acak/gabungan buatan">🧹 Bersihkan Kata Acak</button>
+                        </div>
+                    </div>
+                    <div class="lab-stats">
+                        <span>🧠 Total Neuron: <b id="txtModalNeurons">120.000</b></span>
+                        <span>💾 Memori: <b id="txtModalMemory">12.5 MB</b></span>
+                        <span>⚡ Dopamine: <b id="txtModalDopa">20%</b></span>
+                        <span>📖 Kosakata: <b id="txtModalVocab">32 Words</b></span>
+                    </div>
+                    <div id="txtEvolutionNotice" style="margin-top: 8px; font-size: 0.8rem; color: #94a3b8; line-height: 1.3;"></div>
+                </div>
+
+                <!-- Section 2: Pre-train Korpus Teks -->
+                <div class="lab-section">
+                    <h4>📚 PRE-TRAIN KORPUS PENGETAHUAN</h4>
+                    <p class="section-desc">Masukkan teks korpus/pelajaran (bahasa, matematika, cerita) untuk melatih SNN Pet secara instan:</p>
+                    <textarea id="txtCorpusInput" class="corpus-textarea" rows="3" placeholder="Ketik atau paste materi pelajaran di sini (contoh: 'kucing suka ikan, air dingin, 2+3=5, halo teman')..."></textarea>
+                    <button id="btnModalPretrain" class="btn-lab-primary">📚 JALANKAN PRE-TRAIN KORPUS</button>
+                </div>
+
+                <!-- Section 3: Import Link / Video Korpus -->
+                <div class="lab-section">
+                    <h4>🔗 IMPORT LINK / VIDEO / DOKUMENTASI</h4>
+                    <p class="section-desc">Masukkan URL Video atau Link Artikel untuk diekstrak menjadi bahan korpus belajar:</p>
+                    <div class="input-with-button">
+                        <input id="inputCorpusUrl" type="url" class="lab-input" placeholder="https://youtube.com/watch?... atau https://wikipedia.org/..." />
+                        <button id="btnModalImportUrl" class="btn-lab-secondary">📥 IMPORT LINK</button>
+                    </div>
+                </div>
+
+                <!-- Section 4: Teacher Signal (LLM API Settings & Curriculum Instruction) -->
+                <div class="lab-section">
+                    <h4>🤖 MODEL GURU AI (LLM TEACHER ADAPTER)</h4>
+                    <p class="section-desc">Atur Provider, Model, Instruksi Perintah/Kurikulum, dan API Key untuk membimbing AI Pet secara akurat:</p>
+
+                    <div class="lab-form-row">
+                        <div class="lab-form-group">
+                            <label class="lab-form-label">Provider LLM:</label>
+                            <select id="selectLlmProvider" class="lab-select">
+                                <option value="gemini">Google Gemini</option>
+                                <option value="openai">OpenAI</option>
+                                <option value="deepseek">DeepSeek AI</option>
+                                <option value="anthropic">Anthropic Claude</option>
+                                <option value="groq">Groq Cloud</option>
+                                <option value="openrouter">OpenRouter</option>
+                                <option value="mistral">Mistral AI</option>
+                                <option value="xai">xAI Grok</option>
+                                <option value="together">Together AI</option>
+                            </select>
+                        </div>
+                        <div class="lab-form-group">
+                            <label class="lab-form-label">Model AI:</label>
+                            <select id="selectLlmModel" class="lab-select">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="divCustomModelGroup" class="lab-form-group hidden">
+                        <label class="lab-form-label">✏️ Custom Model ID (Manual):</label>
+                        <input id="inputLlmCustomModel" type="text" class="lab-input" placeholder="Masukkan ID model kustom (contoh: gemini-3.8-flash, gpt-4.5-preview, dll)..." />
+                    </div>
+
+                    <!-- Few-Shot Configuration for LLM Teacher -->
+                    <div class="lab-form-row">
+                        <div class="lab-form-group">
+                            <label class="lab-form-label">🎯 Mode Prompting (Few-Shot):</label>
+                            <select id="selectLlmShotMode" class="lab-select">
+                                <option value="3-shot" selected>3-Shot (Rekomendasi - Cepat & Presisi)</option>
+                                <option value="1-shot">1-Shot (1 Contoh Cepat)</option>
+                                <option value="5-shot">5-Shot (5 Contoh Komprehensif)</option>
+                                <option value="zero">Zero-Shot (Tanpa Contoh)</option>
+                                <option value="custom">Custom Few-Shot (Atur Sendiri)</option>
+                            </select>
+                        </div>
+                        <div class="lab-form-group">
+                            <label class="lab-form-label">✨ Status Pengkondisian Shot:</label>
+                            <div id="badgeShotStatus" class="shot-status-badge">🎯 3-Shot Aktif (MTK, Kepatuhan, Bahasa)</div>
+                        </div>
+                    </div>
+
+                    <div id="divCustomShotsContainer" class="lab-form-group hidden">
+                        <label class="lab-form-label">✏️ Custom Shots (Format baris: User | Respon Guru | Deskripsi):</label>
+                        <textarea id="txtCustomShots" class="corpus-textarea" rows="3" placeholder="1 + 1 = | 2 pintar | Matematika Dasar&#10;duduk | patuh duduk | Kepatuhan Motorik&#10;kucing imut | meow sayang | Afeksi Semantik"></textarea>
+                    </div>
+
+                    <div class="lab-form-group">
+                        <label class="lab-form-label">📋 Perintah / Instruksi Mengajar ke LLM:</label>
+                        <textarea id="txtTeacherInstructions" class="corpus-textarea" rows="2" placeholder="Masukkan instruksi ke LLM (contoh: 'Ajarkan pet matematika dasar, bahasa Indonesia yang ramah, dan sopan santun saat disapa')..."></textarea>
+                    </div>
+
+                    <div class="lab-form-group">
+                        <label class="lab-form-label">🔑 API Key Provider:</label>
+                        <div class="input-with-button">
+                            <input id="inputLlmApiKey" type="password" class="lab-input" placeholder="Masukkan API Key Provider..." />
+                            <button id="btnSaveLlmConfig" class="btn-lab-success">⚡ TES PING & SIMPAN</button>
+                        </div>
+                    </div>
+
+                    <div id="txtTeacherStatus" class="teacher-status-msg"></div>
+                </div>
+
+                <!-- Section 5: Auto-Training SNN (LLM Guru Otonom) -->
+                <div class="lab-section">
+                    <h4>🎓 LAUNCH AUTO-TRAINING (GURU LLM OTONOM)</h4>
+                    <p class="section-desc">Ketik topik/materi (contoh: "MTK", "Bahasa Indonesia", "Sains") untuk memulai loop pelatihan otomatis oleh LLM Guru:</p>
+                    <div class="input-with-button">
+                        <input id="inputAutoTrainTopic" type="text" class="lab-input" placeholder="Masukkan topik (contoh: 'MTK', 'Bahasa Indonesia')..." />
+                        <button id="btnStartAutoTrain" class="btn-lab-primary">🚀 MULAI AUTO-TRAINING</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
